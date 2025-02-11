@@ -1,26 +1,33 @@
-import { Image, StyleSheet, Platform, View } from 'react-native';
-
+import { useEffect, useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import axios from 'axios'
 export default function HomeScreen() {
+  const [hello, setHello] = useState('')
+  useEffect(() =>{
+    // const getData = async () => {
+    //   await axios.get("http://localhost:3000/").then((res=>{
+    //     console.log(res.data);
+        
+    //     setHello(res.data)
+    //   }))
+    // }
+    // getData()
+  }, [])
   return (
-    <View></View>
+    <View style={styles.container}>
+      <Text style={styles.text}>{hello}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    padding: 16,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  text: {
+    color: "#ffffff"
+  }
 });
