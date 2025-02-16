@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
+app.get('/', (req, res) => {
+    res.send('Welcome to Diploma API!');
+  });  
+
 app.get('/api/users', async (req, res) => {
   try {
     const users = await User.find();
