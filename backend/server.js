@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGO_URI = 'mongodb://localhost:27017/diploma'; // Локальная база MongoDB
+const MONGO_URI = 'mongodb+srv://bbxx77:NurAli2013@cluster0.o4f0yrh.mongodb.net/diploma?retryWrites=true&w=majority';
 
 app.use(cors());
 app.use(express.json());
