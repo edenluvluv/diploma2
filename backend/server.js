@@ -42,6 +42,26 @@ app.post('/api/users', async (req, res) => {
     res.status(500).json({ error: 'Error creating user' });
   }
 });
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  try {
+    let user = await User.findOne({ username });
+    if (!user) {
+      // Создать нового пользователя, если его нет
+      user = new User({ username, password });
+      await user.save();
+    }
+    res.status(200).json({ message: 'Login successful', user });
+  } catch (error) {
+    res.status(500).json({ error: 'Error during login' });
+  }
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

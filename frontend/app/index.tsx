@@ -1,29 +1,43 @@
-import React, { useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from "expo-router";
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import api from '../api'; // Убедись, что путь правильный
 
 export default function Index() {
-  const navigation = useNavigation();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    navigation.setOptions({ headerShown: false });
-  }, [navigation]);
+  const handleLogin = async () => {
+    try {
+      const response = await api.post('/login', { username, password });
+      console.log('Login response:', response.data);
+      Alert.alert('Success', response.data.message);
+    } catch (error) {
+      console.error('Error during login:', error);
+      Alert.alert('Error', 'Login failed. Please try again.');
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>BALAQAI</Text>
       <Text style={styles.subtitle}>КІРУ</Text>
-      
-      <TextInput placeholder="Пайдаланушы аты" style={styles.input} />
-      <TextInput placeholder="Құпия сөз" secureTextEntry style={styles.input} />
-      
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Кіру</Text>
-      </TouchableOpacity>
 
-      <Text style={styles.link}>Пайдаланушы аты немесе құпиясөзді ұмыттыңыз ба?</Text>
-      <TouchableOpacity>
-        <Text style={styles.register}>Тіркелу</Text>
+      <TextInput 
+        placeholder="Пайдаланушы аты" 
+        style={styles.input} 
+        value={username} 
+        onChangeText={setUsername} 
+      />
+      <TextInput 
+        placeholder="Құпия сөз" 
+        secureTextEntry 
+        style={styles.input} 
+        value={password} 
+        onChangeText={setPassword} 
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Кіру</Text>
       </TouchableOpacity>
     </View>
   );
@@ -72,15 +86,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-  },
-  link: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 10,
-  },
-  register: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#f57c00',
   },
 });
