@@ -11,11 +11,14 @@ export default function Index() {
       const response = await api.post('/login', { username, password });
       console.log('Login response:', response.data);
       Alert.alert('Success', response.data.message);
-    } catch (error) {
-      console.error('Error during login:', error);
-      Alert.alert('Error', 'Login failed. Please try again.');
+    } catch (error: any) {
+  console.error('Error during login:', error.response?.data || error.message);
+  Alert.alert('Error', error.response?.data?.message || 'Login failed. Please try again.');
+}
+{
     }
   };
+  
 
   return (
     <View style={styles.container}>
