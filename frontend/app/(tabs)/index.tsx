@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import api from '../api'; // Убедись, что путь правильный
+import api from '../../api'; 
 
 export default function Index() {
   const [username, setUsername] = useState('');
