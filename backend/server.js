@@ -37,27 +37,20 @@ app.get('/api/users', async (req, res) => {
 });
 
 // Регистрация нового пользователя
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { name, email, age } = req.body;
-
+  
   if (!name || !email || !age) {
-    return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
-    // Проверяем, существует ли уже пользователь с таким email
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    const newUser = new User({ name, email, age });
-    await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
+      const newUser = new User({ name, email, age });
+      await newUser.save();
+      res.status(201).json({ message: 'Registration successful', user: newUser });
   } catch (error) {
-    console.error('Error during registration:', error);
-    res.status(500).json({ message: 'Internal server error' });
+      console.error('Error during registration:', error);
+      res.status(500).json({ message: 'Internal server error' });
   }
 });
 
