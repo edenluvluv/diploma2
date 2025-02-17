@@ -1,46 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import api from '../../api'; 
 
-export default function Index() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+export default function RegisterScreen() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [age, setAge] = useState('');
 
-  const handleLogin = async () => {
-    try {
-      const response = await api.post('/login', { username, password });
-      console.log('Login response:', response.data);
-      Alert.alert('Success', response.data.message);
-    } catch (error: any) {
-  console.error('Error during login:', error.response?.data || error.message);
-  Alert.alert('Error', error.response?.data?.message || 'Login failed. Please try again.');
-}
-{
+  const handleRegister = async () => {
+    if (!name || !email || !age) {
+      Alert.alert('Ошибка', 'Все поля должны быть заполнены');
+      return;
     }
-  };
-  
+
+    try {
+      const response = await api.post('/register', { name, email, age });
+      console.log('Register response:', response.data);
+      Alert.alert('Успех', response.data.message);
+    } catch (error: any) {
+      console.error('Error during registration:', error.response?.data || error.message);
+      Alert.alert('Error', error.response?.data?.message || 'Registration failed. Please try again.');
+    }
+  }    
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>BALAQAI</Text>
-      <Text style={styles.subtitle}>КІРУ</Text>
+      <Text style={styles.subtitle}>ТІРКЕЛУ</Text>
 
       <TextInput 
-        placeholder="Пайдаланушы аты" 
+        placeholder="Аты-жөні" 
         style={styles.input} 
-        value={username} 
-        onChangeText={setUsername} 
+        value={name} 
+        onChangeText={setName} 
       />
       <TextInput 
-        placeholder="Құпия сөз" 
-        secureTextEntry 
+        placeholder="Email" 
         style={styles.input} 
-        value={password} 
-        onChangeText={setPassword} 
+        value={email} 
+        onChangeText={setEmail} 
+        keyboardType="email-address"
+      />
+      <TextInput 
+        placeholder="Жасы" 
+        style={styles.input} 
+        value={age} 
+        onChangeText={setAge} 
+        keyboardType="numeric"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Кіру</Text>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <Text style={styles.buttonText}>Тіркелу</Text>
       </TouchableOpacity>
     </View>
   );
