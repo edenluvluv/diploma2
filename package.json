@@ -6,7 +6,7 @@
   "scripts": {
     "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
     "start-backend": "cd backend && node server.js",
-    "start-frontend": "cd frontend && npm start"
+    "start-frontend": "cd frontend && npm run web"
   },
   "keywords": [],
   "author": "",
