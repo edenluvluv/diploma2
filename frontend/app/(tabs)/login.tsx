@@ -1,64 +1,68 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-import { StackNavigationProp } from '@react-navigation/stack'; // Import StackNavigationProp
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../api';
 
-// Define the type for your navigation stack
+// Определяем тип навигации
 type RootStackParamList = {
-    index: undefined; // Define the 'Index' screen
-    login: undefined; // Define the 'Login' screen
+    index: undefined;
+    login: undefined;
+    games: undefined;
 };
 
-// Define the navigation prop type for this screen
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'login'>;
 
 export default function LoginScreen() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [secureText, setSecureText] = useState(true);
-    const navigation = useNavigation<LoginScreenNavigationProp>(); // Initialize navigation with proper typing
+    const [errorMessage, setErrorMessage] = useState(''); // 🔹 Состояние ошибки
+    const navigation = useNavigation<LoginScreenNavigationProp>();
 
     const handleLogin = async () => {
-        if (!username || !password) {
-            Alert.alert('Ошибка', 'Пайдаланушы аты және құпия сөзді енгізіңіз');
+        if (!email || !password) {
+            setErrorMessage('Введите email и пароль');
             return;
         }
 
-        // Simulate login logic
         try {
-            // Replace with your actual login API call
-            console.log('Logging in with:', username, password);
-            Alert.alert('Успех', 'Сіз сәтті кірдіңіз');
-        } catch (error) {
-            Alert.alert('Ошибка', 'Кіру кезінде қате орын алды');
-        }
-    };
+            const response = await api.post('/login', { email, password });
+            console.log('Login response:', response.data);
+            setErrorMessage(''); // ✅ Сбрасываем ошибку при успешном входе
 
-    const handleBack = () => {
-        navigation.navigate('index'); // Navigate to index.tsx
+            // 🔹 После успешного входа переходим в games.tsx
+            navigation.navigate('games');
+
+        } catch (error: any) {
+            console.error('Ошибка при входе:', error);
+            if (error.response?.data?.message) {
+                setErrorMessage(error.response.data.message);
+            } else {
+                setErrorMessage('Ошибка сети');
+            }
+        }
     };
 
     return (
         <View style={styles.container}>
-            {/* Back Button */}
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('index')}>
                 <Ionicons name="arrow-back" size={24} color="#555" />
             </TouchableOpacity>
 
-            {/* Title */}
             <Text style={styles.title}>BALAQAI</Text>
             <Text style={styles.subtitle}>КІРУ</Text>
 
-            {/* Username Input */}
-            <Text style={styles.label}>Пайдаланушы аты</Text>
+            {/* Email Input */}
+            <Text style={styles.label}>Электрондық пошта</Text>
             <TextInput
-                placeholder="Пайдаланушы атыңызды енгізіңіз"
-                placeholderTextColor="#999" // Gray placeholder text
+                placeholder="Email енгізіңіз"
+                placeholderTextColor="#999"
                 style={styles.input}
-                value={username}
-                onChangeText={setUsername}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
             />
 
             {/* Password Input */}
@@ -66,7 +70,7 @@ export default function LoginScreen() {
             <View style={styles.passwordContainer}>
                 <TextInput
                     placeholder="Құпия сөзіңізді енгізіңіз"
-                    placeholderTextColor="#999" // Gray placeholder text
+                    placeholderTextColor="#999"
                     style={styles.passwordInput}
                     value={password}
                     onChangeText={setPassword}
@@ -77,21 +81,11 @@ export default function LoginScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* Forgot Password Link */}
-            <TouchableOpacity style={styles.forgotPassword}>
-                <Text style={styles.forgotPasswordText}>
-                    Пайдаланушы аты немесе құпия сөзді ұмыттыңыз ба?
-                </Text>
-            </TouchableOpacity>
+            {/* 🔴 Текст ошибки (если есть) */}
+            {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-            {/* Login Button */}
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Кіру</Text>
-            </TouchableOpacity>
-
-            {/* Register Link */}
-            <TouchableOpacity style={styles.registerLink}>
-                <Text style={styles.registerLinkText}>Тіркелу</Text>
             </TouchableOpacity>
         </View>
     );
@@ -154,13 +148,10 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 50,
     },
-    forgotPassword: {
-        alignSelf: 'flex-start',
-        marginBottom: 20,
-    },
-    forgotPasswordText: {
+    errorText: { // 🔴 Стиль ошибки
+        color: 'red',
         fontSize: 14,
-        color: '#555',
+        marginBottom: 10,
     },
     button: {
         width: '100%',
@@ -175,12 +166,5 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: '#fff',
-    },
-    registerLink: {
-        alignSelf: 'center',
-    },
-    registerLinkText: {
-        fontSize: 16,
-        color: '#555',
     },
 });

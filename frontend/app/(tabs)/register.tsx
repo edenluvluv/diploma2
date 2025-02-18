@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-import { StackNavigationProp } from '@react-navigation/stack'; // Import StackNavigationProp
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../api';
 
-// Define the type for your navigation stack
+// Определяем тип навигации
 type RootStackParamList = {
-    index: undefined; // Define the 'Index' screen
-    Register: undefined; // Define the 'Register' screen (optional, if needed)
+    index: undefined;
+    Register: undefined;
 };
 
-// Define the navigation prop type for this screen
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
 export default function RegisterScreen() {
@@ -20,34 +19,42 @@ export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [secureText, setSecureText] = useState(true);
-    const navigation = useNavigation<RegisterScreenNavigationProp>(); // Initialize navigation with proper typing
+    const [errorMessage, setErrorMessage] = useState(''); // 🔹 Состояние ошибки
+    const navigation = useNavigation<RegisterScreenNavigationProp>();
 
     const handleRegister = async () => {
         if (!fullName || !phoneNumber || !email || !password) {
-            Alert.alert('Ошибка', 'Все поля должны быть заполнены');
+            setErrorMessage('Все поля должны быть заполнены');
+            return;
+        }
+        if (password.length < 8) {
+            setErrorMessage('Пароль должен содержать минимум 8 символов');
             return;
         }
 
         try {
             const response = await api.post('/register', { fullName, phoneNumber, email, password });
             console.log('Register response:', response.data);
-            Alert.alert('Успех', response.data.message);
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error('Error during registration:', error.message);
+            setErrorMessage('');
+            navigation.navigate('index');
+
+        } catch (error: any) { 
+            console.error('Ошибка при регистрации:', error);
+
+            if (error.response?.data?.message) {
+                setErrorMessage(error.response.data.message);
             } else {
-                console.error('An unexpected error occurred:', error);
+                setErrorMessage('Ошибка сети');
             }
         }
     };
 
     const handleBack = () => {
-        navigation.navigate('index'); // Navigate to index.tsx
+        navigation.navigate('index');
     };
 
     return (
         <View style={styles.container}>
-            {/* Back Button */}
             <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                 <Ionicons name="arrow-back" size={24} color="#555" />
             </TouchableOpacity>
@@ -61,7 +68,7 @@ export default function RegisterScreen() {
                     <Text style={styles.label}>Аты-жөні</Text>
                     <TextInput
                         placeholder="Толық аты-жөніңізді енгізіңіз"
-                        placeholderTextColor="#999" // Gray placeholder text
+                        placeholderTextColor="#999"
                         style={styles.input}
                         value={fullName}
                         onChangeText={setFullName}
@@ -71,7 +78,7 @@ export default function RegisterScreen() {
                     <Text style={styles.label}>Телефон нөмірі</Text>
                     <TextInput
                         placeholder="+7 000 000 00 00"
-                        placeholderTextColor="#999" // Gray placeholder text
+                        placeholderTextColor="#999"
                         style={styles.input}
                         value={phoneNumber}
                         onChangeText={setPhoneNumber}
@@ -85,7 +92,7 @@ export default function RegisterScreen() {
                     <Text style={styles.label}>Электрондық пошта</Text>
                     <TextInput
                         placeholder="example@email.com"
-                        placeholderTextColor="#999" // Gray placeholder text
+                        placeholderTextColor="#999"
                         style={styles.input}
                         value={email}
                         onChangeText={setEmail}
@@ -97,7 +104,7 @@ export default function RegisterScreen() {
                     <View style={styles.passwordContainer}>
                         <TextInput
                             placeholder="Кемінде 8 таңба, әріптер мен сандар"
-                            placeholderTextColor="#999" // Gray placeholder text
+                            placeholderTextColor="#999"
                             style={styles.passwordInput}
                             value={password}
                             onChangeText={setPassword}
@@ -109,6 +116,9 @@ export default function RegisterScreen() {
                     </View>
                 </View>
             </View>
+
+            {/* 🔴 Текст ошибки (если есть) */}
+            {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
             <TouchableOpacity style={styles.button} onPress={handleRegister}>
                 <Text style={styles.buttonText}>Келесі</Text>
@@ -154,7 +164,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     column: {
-        width: '48%', // Slightly less than 50% to account for spacing
+        width: '48%',
     },
     label: {
         fontSize: 14,
@@ -184,6 +194,11 @@ const styles = StyleSheet.create({
     passwordInput: {
         flex: 1,
         height: 50,
+    },
+    errorText: { // 🔴 Стиль ошибки
+        color: 'red',
+        fontSize: 14,
+        marginBottom: 10,
     },
     button: {
         width: '100%',

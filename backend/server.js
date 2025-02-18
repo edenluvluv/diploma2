@@ -56,8 +56,6 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 });
-
-// 📌 Вход в систему (логин)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -70,13 +68,9 @@ app.post('/api/login', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'Пользователь не найден' });
     }
-
-    // ПРОВЕРЯЕМ ПАРОЛЬ (БЕЗ ХЕШИРОВАНИЯ)
     if (user.password !== password) {
       return res.status(401).json({ message: 'Неверный пароль' });
     }
-
-    // Создаем токен
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(200).json({ message: 'Вход выполнен!', token, user });
@@ -86,7 +80,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// 📌 Получение списка пользователей (без паролей)
 app.get('/api/users', async (req, res) => {
   try {
     const users = await User.find({}, '-password'); // Исключаем пароли
