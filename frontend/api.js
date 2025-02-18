@@ -1,6 +1,7 @@
 import axios from 'axios';
 const api = axios.create({
-  baseURL: 'https://diploma2-backend1.onrender.com/api', 
+  baseURL: 'http://localhost:3000/api', // Локальный сервер
 });
+
 
 export default api;
