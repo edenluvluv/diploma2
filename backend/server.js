@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
@@ -14,21 +13,25 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log(' Connected to MongoDB'))
-  .catch(err => console.error(' Error connecting to MongoDB:', err));
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ Error connecting to MongoDB:', err));
+
+// 📌 Схема пользователя (БЕЗ ХЕШИРОВАНИЯ ПАРОЛЕЙ)
 const UserSchema = new mongoose.Schema({
   fullName: String,
   phoneNumber: String,
   email: { type: String, unique: true },
-  password: String
+  password: String // ⚠️ Пароль будет храниться в открытом виде
 });
 
 const User = mongoose.model('User', UserSchema);
 
+// 📌 Главная страница
 app.get('/', (req, res) => {
   res.send('Welcome to Diploma API!');
 });
 
+// 📌 Регистрация пользователя (БЕЗ ХЕШИРОВАНИЯ)
 app.post('/api/register', async (req, res) => {
   const { fullName, phoneNumber, email, password } = req.body;
 
@@ -43,19 +46,18 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ message: 'Этот email уже зарегистрирован' });
     }
 
-    // Хешируем пароль перед сохранением
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({ fullName, phoneNumber, email, password: hashedPassword });
+    // СОХРАНЯЕМ ПАРОЛЬ В ОТКРЫТОМ ВИДЕ (⚠️ НЕБЕЗОПАСНО)
+    const newUser = new User({ fullName, phoneNumber, email, password });
     await newUser.save();
 
     res.status(201).json({ message: 'Регистрация успешна!' });
   } catch (error) {
-    console.error('Ошибка при регистрации:', error);
+    console.error('❌ Ошибка при регистрации:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 });
 
+// 📌 Вход в систему (логин)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -69,9 +71,8 @@ app.post('/api/login', async (req, res) => {
       return res.status(404).json({ message: 'Пользователь не найден' });
     }
 
-    // Проверяем пароль
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    // ПРОВЕРЯЕМ ПАРОЛЬ (БЕЗ ХЕШИРОВАНИЯ)
+    if (user.password !== password) {
       return res.status(401).json({ message: 'Неверный пароль' });
     }
 
@@ -80,21 +81,22 @@ app.post('/api/login', async (req, res) => {
 
     res.status(200).json({ message: 'Вход выполнен!', token, user });
   } catch (error) {
-    console.error('Ошибка при входе:', error);
+    console.error('❌ Ошибка при входе:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 });
 
+// 📌 Получение списка пользователей (без паролей)
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await User.find({}, '-password'); 
+    const users = await User.find({}, '-password'); // Исключаем пароли
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Ошибка при получении списка пользователей' });
   }
 });
 
-
+// 📌 Запуск сервера
 app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен на порту ${PORT}`);
 });
