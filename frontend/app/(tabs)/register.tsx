@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 // Определяем тип навигации
 type RootStackParamList = {
@@ -19,7 +21,7 @@ export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [secureText, setSecureText] = useState(true);
-    const [errorMessage, setErrorMessage] = useState(''); // 🔹 Состояние ошибки
+    const [errorMessage, setErrorMessage] = useState(''); 
     const navigation = useNavigation<RegisterScreenNavigationProp>();
 
     const handleRegister = async () => {
@@ -27,25 +29,24 @@ export default function RegisterScreen() {
             setErrorMessage('Все поля должны быть заполнены');
             return;
         }
+    
         if (password.length < 8) {
             setErrorMessage('Пароль должен содержать минимум 8 символов');
             return;
         }
-
+    
         try {
             const response = await api.post('/register', { fullName, phoneNumber, email, password });
             console.log('Register response:', response.data);
+
+            await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+    
             setErrorMessage('');
-            navigation.navigate('index');
-
-        } catch (error: any) { 
+            navigation.navigate('index'); 
+    
+        } catch (error: any) {
             console.error('Ошибка при регистрации:', error);
-
-            if (error.response?.data?.message) {
-                setErrorMessage(error.response.data.message);
-            } else {
-                setErrorMessage('Ошибка сети');
-            }
+            setErrorMessage(error.response?.data?.message || 'Ошибка сети');
         }
     };
 
@@ -117,7 +118,6 @@ export default function RegisterScreen() {
                 </View>
             </View>
 
-            {/* 🔴 Текст ошибки (если есть) */}
             {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
             <TouchableOpacity style={styles.button} onPress={handleRegister}>

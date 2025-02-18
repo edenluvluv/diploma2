@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 // Определяем тип навигации
 type RootStackParamList = {
@@ -26,25 +28,22 @@ export default function LoginScreen() {
             setErrorMessage('Введите email и пароль');
             return;
         }
-
+    
         try {
             const response = await api.post('/login', { email, password });
             console.log('Login response:', response.data);
-            setErrorMessage(''); // ✅ Сбрасываем ошибку при успешном входе
-
-            // 🔹 После успешного входа переходим в games.tsx
-            navigation.navigate('games');
-
+    
+            // cохранение юзера в AsyncStorage
+            await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+    
+            setErrorMessage('');
+            navigation.navigate('games'); 
+    
         } catch (error: any) {
             console.error('Ошибка при входе:', error);
-            if (error.response?.data?.message) {
-                setErrorMessage(error.response.data.message);
-            } else {
-                setErrorMessage('Ошибка сети');
-            }
+            setErrorMessage(error.response?.data?.message || 'Ошибка сети');
         }
     };
-
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('index')}>
@@ -64,8 +63,6 @@ export default function LoginScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
             />
-
-            {/* Password Input */}
             <Text style={styles.label}>Құпия сөз</Text>
             <View style={styles.passwordContainer}>
                 <TextInput
@@ -80,8 +77,6 @@ export default function LoginScreen() {
                     <Ionicons name={secureText ? 'eye-off' : 'eye'} size={24} color="gray" />
                 </TouchableOpacity>
             </View>
-
-            {/* 🔴 Текст ошибки (если есть) */}
             {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -90,7 +85,6 @@ export default function LoginScreen() {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -148,7 +142,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 50,
     },
-    errorText: { // 🔴 Стиль ошибки
+    errorText: { 
         color: 'red',
         fontSize: 14,
         marginBottom: 10,

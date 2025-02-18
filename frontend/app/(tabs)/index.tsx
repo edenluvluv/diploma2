@@ -1,88 +1,101 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Modal } from "react-native";
-import styles from "./BalaqaiPage.styles"; // Import styles
+import styles from "./BalaqaiPage.styles";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BalaqaiPage: React.FC = () => {
-  const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
+    const router = useRouter();
+    const [modalVisible, setModalVisible] = useState(false);
+    const [user, setUser] = useState<string | null>(null);
+    useEffect(() => {
+        const checkUser = async () => {
+            const storedUser = await AsyncStorage.getItem('user');
+            if (storedUser) {
+                setUser(storedUser);
+            }
+        };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.header}>BALAQAI</Text>
-      <View style={styles.content}>
-        <View style={styles.greeting}>
-          <Text>Сәлем</Text>
-          <Text style={styles.bold}>АЛИЯР!</Text>
-        </View>
+        checkUser();
+    }, []);
+    const handleStart = () => {
+        if (user) {
+            router.push("/games"); 
+        } else {
+            setModalVisible(true); 
+        }
+    };
 
-        {/* Start Button - Opens Modal */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.buttonText}>БАСТАУ</Text>
-        </TouchableOpacity>
-
-        {/* Modal for Choosing Register, Login, or Games */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalText}>Қайсысын таңдауға болады?</Text>
-
-              <View style={styles.buttonContainer}>
-                {/* Register Button */}
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => {
-                    setModalVisible(false);
-                    router.push("/register");
-                  }}
-                >
-                  <Text style={styles.buttonText}>Тіркелу</Text>
+    return (
+        <View style={styles.container}>
+            <Text style={styles.header}>BALAQAI</Text>
+            <View style={styles.content}>
+                <View style={styles.greeting}>
+                    <Text>Сәлем</Text>
+                    <Text style={styles.bold}>АЛИЯР!</Text>
+                </View>
+                <TouchableOpacity style={styles.button} onPress={handleStart}>
+                    <Text style={styles.buttonText}>БАСТАУ</Text>
                 </TouchableOpacity>
-
-                {/* Login Button */}
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.loginButton]}
-                  onPress={() => {
-                    setModalVisible(false);
-                    router.push("/login");
-                  }}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
                 >
-                  <Text style={styles.buttonText}>Кіру</Text>
-                </TouchableOpacity>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalText}>Қайсысын таңдауға болады?</Text>
 
-                {/* Games Button */}
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.gamesButton]}
-                  onPress={() => {
-                    setModalVisible(false);
-                    router.push("/games"); // Correct path
-                  }}
-                >
-                  <Text style={styles.buttonText}>Ойындар</Text>
-                </TouchableOpacity>
-              </View>
+                            <View style={styles.buttonContainer}>
+                                {/* Тіркелу */}
+                                <TouchableOpacity
+                                    style={styles.modalButton}
+                                    onPress={() => {
+                                        setModalVisible(false);
+                                        router.push("/register");
+                                    }}
+                                >
+                                    <Text style={styles.buttonText}>Тіркелу</Text>
+                                </TouchableOpacity>
 
-              {/* Cancel Button */}
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>Болдырмау</Text>
-              </TouchableOpacity>
+                                {/* Кіру */}
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.loginButton]}
+                                    onPress={() => {
+                                        setModalVisible(false);
+                                        router.push("/login");
+                                    }}
+                                >
+                                    <Text style={styles.buttonText}>Кіру</Text>
+                                </TouchableOpacity>
+
+                                {/* Ойындар (если залогинен) */}
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.gamesButton]}
+                                    onPress={() => {
+                                        setModalVisible(false);
+                                        router.push("/games");
+                                    }}
+                                    disabled={!user} // Заблокировано, если нет юзера
+                                >
+                                    <Text style={styles.buttonText}>Ойындар</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Болдырмау */}
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <Text style={styles.cancelButtonText}>Болдырмау</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
             </View>
-          </View>
-        </Modal>
-      </View>
-    </View>
-  );
+        </View>
+    );
 };
 
 export default BalaqaiPage;

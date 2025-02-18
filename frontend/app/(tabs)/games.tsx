@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import { StackNavigationProp } from '@react-navigation/stack'; // Import StackNavigationProp
 import api from '../../api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 type RootStackParamList = {
     index: undefined; // Define the 'Index' screen
