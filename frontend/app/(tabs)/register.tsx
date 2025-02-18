@@ -5,9 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
-// Определяем тип навигации
 type RootStackParamList = {
     index: undefined;
     Register: undefined;
