@@ -19,6 +19,18 @@ const styles = StyleSheet.create({
     content: {
         alignItems: "center",
     },
+    logoutButton: {
+        position: 'absolute',
+        top: 40, // Adjust as needed
+        left: 20, // Adjust as needed
+        padding: 10,
+        backgroundColor: '#ff4444', // Red color for logout
+        borderRadius: 5,
+    },
+    logoutButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
     greeting: {
         alignItems: "center",
     },

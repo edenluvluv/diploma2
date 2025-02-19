@@ -8,6 +8,7 @@ const BalaqaiPage: React.FC = () => {
     const router = useRouter();
     const [modalVisible, setModalVisible] = useState(false);
     const [user, setUser] = useState<string | null>(null);
+
     useEffect(() => {
         const checkUser = async () => {
             const storedUser = await AsyncStorage.getItem('user');
@@ -18,16 +19,31 @@ const BalaqaiPage: React.FC = () => {
 
         checkUser();
     }, []);
+
     const handleStart = () => {
         if (user) {
-            router.push("/games"); 
+            router.push("/games");
         } else {
-            setModalVisible(true); 
+            setModalVisible(true);
         }
+    };
+
+    const handleLogout = async () => {
+        await AsyncStorage.removeItem('user');
+        setUser(null);
+        router.push("/login");
     };
 
     return (
         <View style={styles.container}>
+            {/* Logout Button */}
+            <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+            >
+                <Text style={styles.logoutButtonText}>Шығу</Text>
+            </TouchableOpacity>
+
             <Text style={styles.header}>BALAQAI</Text>
             <View style={styles.content}>
                 <View style={styles.greeting}>
@@ -70,17 +86,6 @@ const BalaqaiPage: React.FC = () => {
                                     <Text style={styles.buttonText}>Кіру</Text>
                                 </TouchableOpacity>
 
-                                {/* Ойындар (если залогинен) */}
-                                <TouchableOpacity
-                                    style={[styles.modalButton, styles.gamesButton]}
-                                    onPress={() => {
-                                        setModalVisible(false);
-                                        router.push("/games");
-                                    }}
-                                    disabled={!user} // Заблокировано, если нет юзера
-                                >
-                                    <Text style={styles.buttonText}>Ойындар</Text>
-                                </TouchableOpacity>
                             </View>
 
                             {/* Болдырмау */}
