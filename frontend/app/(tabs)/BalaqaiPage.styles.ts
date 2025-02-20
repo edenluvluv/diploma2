@@ -19,18 +19,12 @@ const styles = StyleSheet.create({
     content: {
         alignItems: "center",
     },
-    logoutButton: {
-        position: 'absolute',
-        top: 40, // Adjust as needed
-        left: 20, // Adjust as needed
-        padding: 10,
-        backgroundColor: '#ff4444', // Red color for logout
-        borderRadius: 5,
+    logoutIcon: {
+        position: "absolute",
+        top: 20,  // Adjust as needed
+        left: 20, // Move it to the left
     },
-    logoutButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
+
     greeting: {
         alignItems: "center",
     },
@@ -62,7 +56,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modalContent: {
-        width: "80%",
+        width: "50%",
         padding: 20,
         backgroundColor: "white",
         borderRadius: 10,
@@ -80,18 +74,18 @@ const styles = StyleSheet.create({
     },
     modalButton: {
         flex: 1,
-        backgroundColor: "#FFD700",
+        backgroundColor: "#599c9e",
         padding: 15,
         marginHorizontal: 5,
         borderRadius: 10,
         alignItems: "center",
     },
     loginButton: {
-        backgroundColor: "#4CAF50",
+        backgroundColor: "#599c9e",
     },
     cancelButton: {
         marginTop: 15,
-        backgroundColor: "red",
+        backgroundColor: "#d27856",
         padding: 10,
         borderRadius: 10,
         alignItems: "center",

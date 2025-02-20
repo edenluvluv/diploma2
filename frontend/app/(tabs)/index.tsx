@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Modal } from "react-native";
+import { MaterialIcons } from '@expo/vector-icons'; // Import logout icon
 import styles from "./BalaqaiPage.styles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -36,12 +37,9 @@ const BalaqaiPage: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/* Logout Button */}
-            <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={handleLogout}
-            >
-                <Text style={styles.logoutButtonText}>Шығу</Text>
+            {/* Logout Button as an Icon (Top Left) */}
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutIcon}>
+                <MaterialIcons name="logout" size={28} color="black" />
             </TouchableOpacity>
 
             <Text style={styles.header}>BALAQAI</Text>
@@ -85,7 +83,6 @@ const BalaqaiPage: React.FC = () => {
                                 >
                                     <Text style={styles.buttonText}>Кіру</Text>
                                 </TouchableOpacity>
-
                             </View>
 
                             {/* Болдырмау */}
