@@ -19,12 +19,12 @@ const AchievementsPage: React.FC = () => {
     };
 
     const achievements = [
-        { id: 1, name: 'xericrik', completed: true },
-        { id: 2, name: 'xericrik', completed: true },
-        { id: 3, name: 'xericrik', completed: true },
-        { id: 4, name: 'xericrik', completed: false },
-        { id: 5, name: 'xericrik', completed: false },
-        { id: 6, name: 'xericrik', completed: false },
+        { id: 1, name: 'achievement', completed: true },
+        { id: 2, name: 'achievement', completed: true },
+        { id: 3, name: 'achievement', completed: true },
+        { id: 4, name: 'achievement', completed: false },
+        { id: 5, name: 'achievement', completed: false },
+        { id: 6, name: 'achievement', completed: false },
     ];
 
     const completedCount = achievements.filter((a) => a.completed).length;
@@ -42,7 +42,7 @@ const AchievementsPage: React.FC = () => {
 
             {/* Progress Indicator */}
             <Text style={styles.progressText}>
-                Mehlix xericrikrepilx {completedCount}/{totalCount}
+                My achievements {completedCount}/{totalCount}
             </Text>
 
             {/* Achievements List */}
