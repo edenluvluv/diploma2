@@ -41,7 +41,7 @@ export default function LoginScreen() {
             if (user.role === 'admin') {
                 router.replace('/admin');
             } else {
-                router.replace('/games');
+                router.replace('/');
             }
 
 
