@@ -16,24 +16,25 @@ const BalaqaiPage: React.FC = () => {
             if (storedUser) {
                 const parsedUser = JSON.parse(storedUser);
                 setUser(parsedUser);
-
-                if (parsedUser.isAdmin) {
-                    router.replace("/admin"); // ✅ Use `replace` instead of `push`
-                }
             }
         };
 
         checkUser();
     }, []);
 
-
     const handleStart = () => {
         if (user) {
-            router.push("/games");
+            const parsedUser = typeof user === "string" ? JSON.parse(user) : user;
+            if (parsedUser?.role === "admin") {
+                router.push("/admin");
+            } else {
+                router.push("/games");
+            }
         } else {
             setModalVisible(true);
         }
     };
+
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem('user');
