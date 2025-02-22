@@ -14,12 +14,18 @@ const BalaqaiPage: React.FC = () => {
         const checkUser = async () => {
             const storedUser = await AsyncStorage.getItem('user');
             if (storedUser) {
-                setUser(storedUser);
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+
+                if (parsedUser.isAdmin) {
+                    router.replace("/admin"); // ✅ Use `replace` instead of `push`
+                }
             }
         };
 
         checkUser();
     }, []);
+
 
     const handleStart = () => {
         if (user) {

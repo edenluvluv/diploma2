@@ -5,14 +5,15 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
-
-// Определяем тип навигации
 type RootStackParamList = {
     index: undefined;
     login: undefined;
     games: undefined;
+    admin: undefined;  
 };
+
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'login'>;
 
@@ -20,30 +21,36 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [secureText, setSecureText] = useState(true);
-    const [errorMessage, setErrorMessage] = useState(''); // 🔹 Состояние ошибки
+    const [errorMessage, setErrorMessage] = useState(''); 
     const navigation = useNavigation<LoginScreenNavigationProp>();
+
+    const router = useRouter();
 
     const handleLogin = async () => {
         if (!email || !password) {
             setErrorMessage('Введите email и пароль');
             return;
         }
-    
+
         try {
             const response = await api.post('/login', { email, password });
-            console.log('Login response:', response.data);
-    
-            // cохранение юзера в AsyncStorage
-            await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
-    
+            const user = response.data.user;
+            await AsyncStorage.setItem('user', JSON.stringify(user));
             setErrorMessage('');
-            navigation.navigate('games'); 
-    
+
+            if (user.role === 'admin') {
+                router.replace('/admin');
+            } else {
+                router.replace('/games');
+            }
+
+
         } catch (error: any) {
             console.error('Ошибка при входе:', error);
             setErrorMessage(error.response?.data?.message || 'Ошибка сети');
         }
     };
+
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('index')}>

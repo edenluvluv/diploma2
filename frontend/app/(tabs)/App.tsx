@@ -7,6 +7,7 @@ import GamesPage from "./games"; // Ensure this file exists
 import AchievementsPage from "./achievements";
 import Karaoke_choosePage from "./karaoke_choose";
 import MathPage from './math';
+import AdminPage from './admin';
 
 const App: React.FC = () => {
     return (
@@ -17,8 +18,9 @@ const App: React.FC = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/games" element={<GamesPage />} />
                 <Route path="/achievements" element={<AchievementsPage />} />
-                <Route path="/games/karaoke_choose" element={<Karaoke_choosePage />} />
-                <Route path="/games/math" element={<MathPage />} />
+                <Route path="/karaoke_choose" element={<Karaoke_choosePage />} />
+                <Route path="/math" element={<MathPage />} />
+                <Route path=".admin" element={<AdminPage />} />
             </Routes>
         </Router>
     );
