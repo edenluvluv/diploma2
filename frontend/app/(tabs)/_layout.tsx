@@ -10,7 +10,6 @@ export default function Layout() {
       <Stack.Screen name="login" />
       <Stack.Screen name="games" />
       <Stack.Screen name="achievements" />
-      <Stack.Screen name="karaoke_choose" />
       <Stack.Screen name="math" />
       <Stack.Screen name="admin" />
       <Stack.Screen name="diary" />

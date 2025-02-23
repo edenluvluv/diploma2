@@ -8,7 +8,6 @@ type RootStackParamList = {
     index: undefined;
     games: undefined;
     achievements: undefined;
-    karaoke_choose: undefined; 
     math: undefined;
 };
 
@@ -25,11 +24,6 @@ const GamesPage: React.FC = () => {
         navigation.navigate('achievements');
     };
 
-    const handleKaraoke_choose = () => {
-        console.log('Navigating to Karaoke Choose');
-        navigation.navigate('karaoke_choose');
-
-    };
 
     const handleMathNavigation = () => {
         navigation.navigate('math'); // <-- Navigate to Math screen
@@ -37,7 +31,7 @@ const GamesPage: React.FC = () => {
 
     const games = [
         { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: () => console.log('Game 1 Pressed') },
-        { id: 2, name: 'караоке', icon: '🕹️', onPress: handleKaraoke_choose },
+        { id: 2, name: 'Игра 2', icon: '🕹️' },
         { id: 3, name: 'жұптарды табыңыз', icon: '👾', onPress: () => console.log('Game 3 Pressed') },
         { id: 4, name: 'лабиринт', icon: '🃏', onPress: () => console.log('Game 4 Pressed') },
         { id: 5, name: 'математика', icon: '🎲', onPress: handleMathNavigation },
