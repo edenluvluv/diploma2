@@ -1,17 +1,31 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-    container: {
+    background: {
         flex: 1,
         width: "100%",
         height: "100%",
-        backgroundColor: "#A3E7FC",
+    },
+    container: {
+        flex: 1,
         alignItems: "center",
         justifyContent: "center",
     },
+    rowContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "80%",  // Adjust width as needed
+        marginTop: 20,
+    },
+    centeredRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center", // Centers them horizontally
+        marginTop: 20,
+        gap: 10, // Adds small spacing between greeting and button
+    },
     header: {
-        position: "absolute",
-        top: "8%",
         fontSize: 48,
         fontWeight: "bold",
         color: "#FFD700",
@@ -21,8 +35,12 @@ const styles = StyleSheet.create({
     },
     logoutIcon: {
         position: "absolute",
-        top: 20,  // Adjust as needed
-        left: 20, // Move it to the left
+        top: 20,
+        left: 20,
+        zIndex: 10, // Ensures it stays on top
+        backgroundColor: "rgba(255, 255, 255, 0.5)", // Slight background to improve visibility
+        padding: 8,
+        borderRadius: 20,
     },
 
     greeting: {
