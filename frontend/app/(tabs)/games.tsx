@@ -9,6 +9,7 @@ type RootStackParamList = {
     games: undefined;
     achievements: undefined;
     math: undefined;
+    next: undefined;
 };
 
 type GamesScreenNavigationProp = StackNavigationProp<RootStackParamList, 'games'>;
@@ -26,15 +27,18 @@ const GamesPage: React.FC = () => {
 
 
     const handleMathNavigation = () => {
-        navigation.navigate('math'); // <-- Navigate to Math screen
+        navigation.navigate('math'); 
     };
 
+const handleNextNavigation = () => {
+        navigation.navigate('next'); 
+    };
     const games = [
         { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: () => console.log('Game 1 Pressed') },
         { id: 2, name: 'Игра 2', icon: '🕹️' },
-        { id: 3, name: 'жұптарды табыңыз', icon: '👾', onPress: () => console.log('Game 3 Pressed') },
+        { id: 3, name: 'Келесі не?', icon: '👾',  onPress: handleNextNavigation },
         { id: 4, name: 'лабиринт', icon: '🃏', onPress: () => console.log('Game 4 Pressed') },
-        { id: 5, name: 'математика', icon: '🎲', onPress: handleMathNavigation },
+        { id: 5, name: 'Математика', icon: '🎲', onPress: handleMathNavigation },
         { id: 6, name: 'әріптер', icon: '🧩' },
         { id: 7, name: 'Игра 7', icon: '♟️' },
         { id: 8, name: 'Игра 8', icon: '🎯' },

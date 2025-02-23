@@ -55,14 +55,13 @@ const BalaqaiPage: React.FC = () => {
 
             {/* Main Content */}
             <View style={styles.container}>
-                <Text style={styles.header}>Welcome</Text>
                 <Text style={styles.header}>BALAQAI</Text>
 
                 {/* Centered Greeting and Button */}
                 <View style={styles.centeredRow}>
                     <View style={styles.greeting}>
                         <Text>Сәлем</Text>
-                        <Text style={styles.bold}>АЛИЯР!</Text>
+                        <Text style={styles.bold}>Балақай!</Text>
                     </View>
                     <TouchableOpacity style={styles.button} onPress={handleStart}>
                         <Text style={styles.buttonText}>БАСТАУ</Text>

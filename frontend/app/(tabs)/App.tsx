@@ -7,6 +7,8 @@ import GamesPage from "./games"; // Ensure this file exists
 import AchievementsPage from "./achievements";
 import MathPage from './math';
 import AdminPage from './admin';
+import NextPage from "./next";
+
 
 const App: React.FC = () => {
     return (
@@ -19,6 +21,7 @@ const App: React.FC = () => {
                 <Route path="/achievements" element={<AchievementsPage />} />
                 <Route path="/math" element={<MathPage />} />
                 <Route path=".admin" element={<AdminPage />} />
+                <Route path="/next" element={<NextPage />} />
             </Routes>
         </Router>
     );
