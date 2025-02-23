@@ -35,7 +35,7 @@ const handleNextNavigation = () => {
     };
     const games = [
         { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: () => console.log('Game 1 Pressed') },
-        { id: 2, name: 'Игра 2', icon: '🕹️' },
+        { id: 2, name: 'Ал тауып көр!', icon: '🕹️' },
         { id: 3, name: 'Келесі не?', icon: '👾',  onPress: handleNextNavigation },
         { id: 4, name: 'лабиринт', icon: '🃏', onPress: () => console.log('Game 4 Pressed') },
         { id: 5, name: 'Математика', icon: '🎲', onPress: handleMathNavigation },
