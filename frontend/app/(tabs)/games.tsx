@@ -10,6 +10,8 @@ type RootStackParamList = {
     achievements: undefined;
     math: undefined;
     next: undefined;
+    maze: undefined;
+    pair: undefined;
 };
 
 type GamesScreenNavigationProp = StackNavigationProp<RootStackParamList, 'games'>;
@@ -25,9 +27,17 @@ const GamesPage: React.FC = () => {
         navigation.navigate('achievements');
     };
 
+    
 
+    const handlePairNavigation = () => {
+        navigation.navigate('pair');
+    };
     const handleMathNavigation = () => {
         navigation.navigate('math'); 
+    };
+
+    const handleMazeNavigation = () => {
+        navigation.navigate('maze');
     };
 
 const handleNextNavigation = () => {
@@ -35,9 +45,9 @@ const handleNextNavigation = () => {
     };
     const games = [
         { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: () => console.log('Game 1 Pressed') },
-        { id: 2, name: 'Ал тауып көр!', icon: '🕹️' },
+        { id: 2, name: 'Ал тауып көр!', icon: '🕹️', onPress: handlePairNavigation },
         { id: 3, name: 'Келесі не?', icon: '👾',  onPress: handleNextNavigation },
-        { id: 4, name: 'лабиринт', icon: '🃏', onPress: () => console.log('Game 4 Pressed') },
+        { id: 4, name: 'лабиринт', icon: '🃏', onPress: handleMazeNavigation },
         { id: 5, name: 'Математика', icon: '🎲', onPress: handleMathNavigation },
         { id: 6, name: 'әріптер', icon: '🧩' },
         { id: 7, name: 'Игра 7', icon: '♟️' },

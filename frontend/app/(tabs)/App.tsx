@@ -8,6 +8,9 @@ import AchievementsPage from "./achievements";
 import MathPage from './math';
 import AdminPage from './admin';
 import NextPage from "./next";
+import LabyrinthPage from './maze';
+import PairPage from './pair';
+
 
 
 const App: React.FC = () => {
@@ -22,6 +25,8 @@ const App: React.FC = () => {
                 <Route path="/math" element={<MathPage />} />
                 <Route path=".admin" element={<AdminPage />} />
                 <Route path="/next" element={<NextPage />} />
+                <Route path="/maze" element={<LabyrinthPage />} />
+                <Route path="/pair" element={<PairPage />} />
             </Routes>
         </Router>
     );
