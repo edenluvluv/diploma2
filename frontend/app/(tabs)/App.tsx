@@ -10,6 +10,11 @@ import AdminPage from './admin';
 import NextPage from "./next";
 import LabyrinthPage from './maze';
 import PairPage from './pair';
+import DiaryPage from './diary';
+import KaraokePage from './karaoke';
+import MemoryPage from './memory';
+import LettersPage from './letters';
+import LettersPracticePage from './letterspractice';
 
 
 
@@ -27,6 +32,11 @@ const App: React.FC = () => {
                 <Route path="/next" element={<NextPage />} />
                 <Route path="/maze" element={<LabyrinthPage />} />
                 <Route path="/pair" element={<PairPage />} />
+                <Route path="/diary" element={<DiaryPage />} />
+                <Route path="/karaoke" element={<KaraokePage />} />
+                <Route path="/memory" element={<MemoryPage />} />
+                <Route path="/letters" element={<LettersPage />} />
+                <Route path="/letterspractice" element={<LettersPracticePage />} />
             </Routes>
         </Router>
     );

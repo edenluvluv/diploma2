@@ -9,18 +9,25 @@ const BalaqaiPage: React.FC = () => {
     const router = useRouter();
     const [modalVisible, setModalVisible] = useState(false);
     const [user, setUser] = useState<string | null>(null);
-
     useEffect(() => {
         const checkUser = async () => {
-            const storedUser = await AsyncStorage.getItem('user');
-            if (storedUser) {
-                const parsedUser = JSON.parse(storedUser);
-                setUser(parsedUser);
+            try {
+                const storedUser = await AsyncStorage.getItem('user');
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+                    setUser(parsedUser);
+                } else {
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error("Error parsing user from AsyncStorage:", error);
+                setUser(null);
             }
         };
 
         checkUser();
     }, []);
+    
 
     const handleStart = () => {
         if (user) {

@@ -12,6 +12,10 @@ type RootStackParamList = {
     next: undefined;
     maze: undefined;
     pair: undefined;
+    diary: undefined;
+    karaoke: undefined;
+    memory: undefined;
+    letters: undefined;
 };
 
 type GamesScreenNavigationProp = StackNavigationProp<RootStackParamList, 'games'>;
@@ -39,19 +43,31 @@ const GamesPage: React.FC = () => {
     const handleMazeNavigation = () => {
         navigation.navigate('maze');
     };
+    const handleDiaryNavigation = () => {
+        navigation.navigate('diary');
+    };
+    const handleKaraokeNavigation = () => {
+        navigation.navigate('karaoke');
+    };
+    const handleMemoryNavigation = () => {
+        navigation.navigate('memory');
+    };
+    const handleLettersNavigation = () => {
+        navigation.navigate('letters');
+    };
 
 const handleNextNavigation = () => {
         navigation.navigate('next'); 
     };
     const games = [
-        { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: () => console.log('Game 1 Pressed') },
+        { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: handleDiaryNavigation },
         { id: 2, name: 'Ал тауып көр!', icon: '🕹️', onPress: handlePairNavigation },
         { id: 3, name: 'Келесі не?', icon: '👾',  onPress: handleNextNavigation },
         { id: 4, name: 'лабиринт', icon: '🃏', onPress: handleMazeNavigation },
         { id: 5, name: 'Математика', icon: '🎲', onPress: handleMathNavigation },
-        { id: 6, name: 'әріптер', icon: '🧩' },
-        { id: 7, name: 'Игра 7', icon: '♟️' },
-        { id: 8, name: 'Игра 8', icon: '🎯' },
+        { id: 6, name: 'әріптер', icon: '🧩', onPress: handleLettersNavigation },
+        { id: 7, name: 'karaoke', icon: '♟️', onPress: handleKaraokeNavigation },
+        { id: 8, name: 'memory', icon: '🎯', onPress: handleMemoryNavigation },
     ];
 
     return (
