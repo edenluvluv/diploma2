@@ -17,6 +17,7 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
+// User Schema
 const UserSchema = new mongoose.Schema({
   fullName: String,
   phoneNumber: String,
@@ -27,6 +28,7 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
+// Song Schema
 const SongSchema = new mongoose.Schema({
   title: String,
   artist: String,
@@ -37,10 +39,22 @@ const SongSchema = new mongoose.Schema({
 
 const Song = mongoose.model('Song', SongSchema);
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Karaoke API!');
+// NEW: Note Schema for Diary App
+const NoteSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
 });
 
+const Note = mongoose.model('Note', NoteSchema);
+
+// Root route
+app.get('/', (req, res) => {
+  res.send('Welcome to the API!');
+});
+
+// === User Routes ===
 app.post('/api/register', async (req, res) => {
   const { fullName, phoneNumber, email, password } = req.body;
 
@@ -149,8 +163,7 @@ app.put('/api/users/:id', async (req, res) => {
   }
 });
 
-// --- Karaoke Song Routes ---
-// Get all songs
+// === Karaoke Song Routes ===
 app.get('/api/songs', async (req, res) => {
   try {
     const songs = await Song.find();
@@ -161,13 +174,8 @@ app.get('/api/songs', async (req, res) => {
 });
 
 // Add new song (Admin only)
-app.post('/api/songs', async (req, res) => {
+app.post('/api/songs', verifyAdmin, async (req, res) => {
   const { title, artist, audio_url, lyrics } = req.body;
-  const { role } = req.user;
-
-  if (role !== 'admin') {
-    return res.status(403).json({ message: 'У вас нет прав для добавления песни' });
-  }
 
   try {
     const newSong = new Song({ title, artist, audio_url, lyrics });
@@ -180,13 +188,7 @@ app.post('/api/songs', async (req, res) => {
 });
 
 // Delete song (Admin only)
-app.delete('/api/songs/:id', async (req, res) => {
-  const { role } = req.user;
-
-  if (role !== 'admin') {
-    return res.status(403).json({ message: 'У вас нет прав для удаления песни' });
-  }
-
+app.delete('/api/songs/:id', verifyAdmin, async (req, res) => {
   try {
     const deletedSong = await Song.findByIdAndDelete(req.params.id);
 
@@ -201,8 +203,85 @@ app.delete('/api/songs/:id', async (req, res) => {
   }
 });
 
+// === NEW: DIARY NOTES ROUTES ===
+// Get all notes for a user
+app.get('/api/notes', async (req, res) => {
+  try {
+    console.log('Fetching notes');
+    // For now, we'll return all notes - you might want to filter by userId later
+    const notes = await Note.find();
+    console.log(`Found ${notes.length} notes`);
+    res.json(notes);
+  } catch (err) {
+    console.error('Error fetching notes:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Create new note
+app.post('/api/notes', async (req, res) => {
+  try {
+    const { userId, title, content } = req.body;
+    console.log('Creating new note:', { userId, title, content });
+    
+    if (!title || !content) {
+      return res.status(400).json({ message: 'Title and content are required' });
+    }
+    
+    const newNote = new Note({ userId, title, content });
+    const savedNote = await newNote.save();
+    console.log('Note saved successfully:', savedNote);
+    res.status(201).json(savedNote);
+  } catch (err) {
+    console.error('Error creating note:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update note
+app.put('/api/notes/:id', async (req, res) => {
+  try {
+    const { userId, title, content } = req.body;
+    console.log('Updating note:', req.params.id, { userId, title, content });
+    
+    const updatedNote = await Note.findByIdAndUpdate(
+      req.params.id,
+      { userId, title, content },
+      { new: true }
+    );
+    
+    if (!updatedNote) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+    
+    console.log('Note updated successfully:', updatedNote);
+    res.json(updatedNote);
+  } catch (err) {
+    console.error('Error updating note:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete note
+app.delete('/api/notes/:id', async (req, res) => {
+  try {
+    console.log('Deleting note:', req.params.id);
+    const deletedNote = await Note.findByIdAndDelete(req.params.id);
+    
+    if (!deletedNote) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+    
+    console.log('Note deleted successfully');
+    res.json({ message: 'Note deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting note:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // --- Middleware for Admin Authentication ---
-const verifyAdmin = async (req, res, next) => {
+function verifyAdmin(req, res, next) {
   const token = req.headers['authorization'];
 
   if (!token) {
@@ -210,7 +289,7 @@ const verifyAdmin = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token.replace('Bearer ', ''), JWT_SECRET);
     req.user = decoded;
     if (decoded.role !== 'admin') {
       return res.status(403).json({ message: 'Access forbidden: Admins only' });
@@ -219,8 +298,9 @@ const verifyAdmin = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({ message: 'Invalid token' });
   }
-};
+}
 
+// --- Start the server ---
 app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен на порту ${PORT}`);
 });

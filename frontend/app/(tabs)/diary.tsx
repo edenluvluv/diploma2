@@ -10,6 +10,7 @@ import {
     Dimensions
 } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Note = {
     _id?: string;
@@ -23,38 +24,108 @@ const DiaryPage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [token, setToken] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
 
-    const baseURL = 'http://localhost:8081/api/notes';
-
+    // Update this to match your backend URL
+    const baseURL = 'http://localhost:3000/api/notes';
 
     useEffect(() => {
-        fetchNotes();
+        // Load auth token and user ID when component mounts
+        const loadAuthData = async () => {
+            try {
+                const storedToken = await AsyncStorage.getItem('authToken');
+                const userData = await AsyncStorage.getItem('userData');
+                
+                if (storedToken) {
+                    setToken(storedToken);
+                }
+                
+                if (userData) {
+                    const parsedUserData = JSON.parse(userData);
+                    setUserId(parsedUserData.id);
+                } else {
+                    // If no user data, use a default ID
+                    setUserId('guest_user');
+                }
+            } catch (error) {
+                console.error('Error loading auth data:', error);
+                // Set a default user ID if we can't load from storage
+                setUserId('guest_user');
+            }
+        };
+
+        loadAuthData();
     }, []);
 
+    useEffect(() => {
+        // Only fetch notes after we have a userId
+        if (userId) {
+            fetchNotes();
+        }
+    }, [userId]);
+
     const fetchNotes = async () => {
+        if (!userId) return;
+        
+        setIsLoading(true);
         try {
-            const res = await axios.get(baseURL);
-            setNotes(res.data);
+            console.log('Fetching notes from:', baseURL);
+            
+            const config = token ? {
+                headers: { Authorization: `Bearer ${token}` }
+            } : {};
+            
+            const res = await axios.get(baseURL, config);
+            console.log('Fetched notes:', res.data);
+            
+            // Filter notes by userId if needed
+            const userNotes = res.data.filter((note: any) => note.userId === userId);
+            setNotes(userNotes);
         } catch (err) {
-            Alert.alert('Error', 'Failed to fetch notes.');
+            console.error('Error fetching notes:', err);
+            Alert.alert('Error', 'Failed to fetch notes. Please check if the server is running.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleSave = async () => {
+        if (!userId) {
+            Alert.alert('Error', 'User ID is not available');
+            return;
+        }
+
+        if (!newTitle.trim() || !newContent.trim()) {
+            Alert.alert('Error', 'Title and content cannot be empty');
+            return;
+        }
+
+        setIsLoading(true);
         try {
-            const userId = "your_user_id_here"; // Replace this with the actual user ID
+            console.log('Saving note...');
+            
+            const config = token ? {
+                headers: { Authorization: `Bearer ${token}` }
+            } : {};
+            
             if (isEditing && selectedNote?._id) {
+                console.log('Updating note with ID:', selectedNote._id);
                 await axios.put(`${baseURL}/${selectedNote._id}`, {
                     userId,
                     title: newTitle,
                     content: newContent
-                });
+                }, config);
+                Alert.alert('Success', 'Note updated successfully');
             } else {
+                console.log('Creating new note');
                 await axios.post(baseURL, {
                     userId,
                     title: newTitle,
                     content: newContent
-                });
+                }, config);
+                Alert.alert('Success', 'Note created successfully');
             }
 
             setNewTitle('');
@@ -63,37 +134,58 @@ const DiaryPage = () => {
             setIsEditing(false);
             fetchNotes();
         } catch (err) {
-            Alert.alert('Error', 'Failed to save note.');
+            console.error('Error saving note:', err);
+            Alert.alert('Error', 'Failed to save note. Please check your connection.');
+        } finally {
+            setIsLoading(false);
         }
     };
     
-
     const handleDelete = async (id: string | undefined) => {
         if (!id) return;
+        
+        setIsLoading(true);
         try {
-            await axios.delete(`${baseURL}/${id}`);
+            console.log('Deleting note with ID:', id);
+            
+            const config = token ? {
+                headers: { Authorization: `Bearer ${token}` }
+            } : {};
+            
+            await axios.delete(`${baseURL}/${id}`, config);
+            Alert.alert('Success', 'Note deleted successfully');
             setSelectedNote(null);
             fetchNotes();
         } catch (err) {
-            Alert.alert('Error', 'Failed to delete note.');
+            console.error('Error deleting note:', err);
+            Alert.alert('Error', 'Failed to delete note. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const renderGrid = () => {
         return (
             <ScrollView contentContainerStyle={styles.grid}>
-                {notes.map((note) => (
-                    <TouchableOpacity
-                        key={note._id}
-                        style={styles.card}
-                        onPress={() => setSelectedNote(note)}
-                    >
-                        <Text style={styles.cardTitle}>{note.title}</Text>
-                        <Text style={styles.cardContent}>
-                            {note.content.substring(0, 30)}...
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+                {isLoading ? (
+                    <Text style={styles.loadingText}>Loading notes...</Text>
+                ) : notes.length > 0 ? (
+                    notes.map((note) => (
+                        <TouchableOpacity
+                            key={note._id}
+                            style={styles.card}
+                            onPress={() => setSelectedNote(note)}
+                        >
+                            <Text style={styles.cardTitle}>{note.title}</Text>
+                            <Text style={styles.cardContent}>
+                                {note.content.substring(0, 30)}
+                                {note.content.length > 30 && '...'}
+                            </Text>
+                        </TouchableOpacity>
+                    ))
+                ) : (
+                    <Text style={styles.emptyText}>No notes found. Create one!</Text>
+                )}
                 <TouchableOpacity
                     style={[styles.card, styles.addCard]}
                     onPress={() => {
@@ -130,13 +222,20 @@ const DiaryPage = () => {
                     multiline
                 />
                 <View style={styles.buttonRow}>
-                    <TouchableOpacity style={styles.button} onPress={handleSave}>
-                        <Text style={styles.buttonText}>Save</Text>
+                    <TouchableOpacity 
+                        style={[styles.button, isLoading && styles.disabledButton]} 
+                        onPress={handleSave}
+                        disabled={isLoading}
+                    >
+                        <Text style={styles.buttonText}>
+                            {isLoading ? 'Saving...' : 'Save'}
+                        </Text>
                     </TouchableOpacity>
                     {selectedNote._id && (
                         <TouchableOpacity
-                            style={[styles.button, styles.deleteButton]}
+                            style={[styles.button, styles.deleteButton, isLoading && styles.disabledButton]}
                             onPress={() => handleDelete(selectedNote._id)}
+                            disabled={isLoading}
                         >
                             <Text style={styles.buttonText}>Delete</Text>
                         </TouchableOpacity>
@@ -147,6 +246,7 @@ const DiaryPage = () => {
                             setSelectedNote(null);
                             setIsEditing(false);
                         }}
+                        disabled={isLoading}
                     >
                         <Text style={styles.buttonText}>Cancel</Text>
                     </TouchableOpacity>
@@ -171,13 +271,13 @@ const DiaryPage = () => {
 };
 
 const screenWidth = Dimensions.get('window').width;
-const cardSize = (screenWidth - 40) / 4;
+const cardSize = (screenWidth - 60) / 2;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        padding: 10,
+        padding: 15,
     },
     grid: {
         flexDirection: 'row',
@@ -186,9 +286,10 @@ const styles = StyleSheet.create({
     },
     card: {
         width: cardSize,
+        height: cardSize,
         backgroundColor: '#f2f2f2',
-        padding: 10,
-        marginBottom: 10,
+        padding: 15,
+        marginBottom: 15,
         borderRadius: 10,
     },
     addCard: {
@@ -198,11 +299,11 @@ const styles = StyleSheet.create({
     },
     cardTitle: {
         fontWeight: 'bold',
-        fontSize: 14,
+        fontSize: 16,
         marginBottom: 5,
     },
     cardContent: {
-        fontSize: 12,
+        fontSize: 14,
         color: '#555',
     },
     messageView: {
@@ -211,16 +312,18 @@ const styles = StyleSheet.create({
     inputLabel: {
         fontWeight: 'bold',
         marginBottom: 5,
+        fontSize: 16,
     },
     input: {
         borderWidth: 1,
         borderColor: '#aaa',
         borderRadius: 8,
-        padding: 10,
-        marginBottom: 15,
+        padding: 12,
+        marginBottom: 20,
+        fontSize: 16,
     },
     multilineInput: {
-        minHeight: 100,
+        minHeight: 150,
         textAlignVertical: 'top',
     },
     buttonRow: {
@@ -229,7 +332,7 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#3b82f6',
-        padding: 10,
+        padding: 15,
         borderRadius: 8,
         flex: 1,
         marginHorizontal: 5,
@@ -240,9 +343,27 @@ const styles = StyleSheet.create({
     cancelButton: {
         backgroundColor: '#9ca3af',
     },
+    disabledButton: {
+        opacity: 0.5,
+    },
     buttonText: {
         color: '#fff',
         textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    loadingText: {
+        textAlign: 'center',
+        padding: 20,
+        color: '#555',
+        fontSize: 16,
+    },
+    emptyText: {
+        textAlign: 'center',
+        padding: 20,
+        color: '#555',
+        width: '100%',
+        fontSize: 16,
     },
 });
 
