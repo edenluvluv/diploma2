@@ -5,10 +5,11 @@ import { MaterialIcons } from '@expo/vector-icons'; // Import logout icon
 import styles from "./BalaqaiPage.styles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const BalaqaiPage: React.FC = () => {
     const router = useRouter();
     const [modalVisible, setModalVisible] = useState(false);
-    const [user, setUser] = useState<string | null>(null);
+    const [user, setUser] = useState<{ fullName: string; role: string } | null>(null);
     useEffect(() => {
         const checkUser = async () => {
             try {
@@ -68,7 +69,9 @@ const BalaqaiPage: React.FC = () => {
                 <View style={styles.centeredRow}>
                     <View style={styles.greeting}>
                         <Text>Сәлем</Text>
-                        <Text style={styles.bold}>Балақай!</Text>
+                        <Text style={styles.bold}>
+                            {user?.fullName ? `${user.fullName}!` : "Балақай!"}
+                        </Text>
                     </View>
                     <TouchableOpacity style={styles.button} onPress={handleStart}>
                         <Text style={styles.buttonText}>БАСТАУ</Text>
