@@ -1,6 +1,14 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+    forumIconButton: {
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        backgroundColor: '#4CAF50',
+        borderRadius: 30,
+        padding: 10,
+    },
     background: {
         flex: 1,
         width: "100%",

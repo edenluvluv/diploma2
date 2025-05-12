@@ -13,6 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.1",
+    "@react-navigation/native": "^7.1.9",
+    "@react-navigation/native-stack": "^7.3.13",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.1",
     "concurrently": "^9.1.2",
@@ -21,6 +23,12 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.1",
-    "react-native-gesture-handler": "^2.24.0"
+    "react-native-gesture-handler": "^2.24.0",
+    "react-native-safe-area-context": "^5.4.0",
+    "react-native-screens": "^4.10.0",
+    "react-native-uuid": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/react-navigation": "^3.0.8"
   }
 }

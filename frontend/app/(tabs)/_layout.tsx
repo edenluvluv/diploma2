@@ -17,6 +17,8 @@ export default function Layout() {
       <Stack.Screen name="user" />
       <Stack.Screen name="letters" />
       <Stack.Screen name="letterspractice" />
+      <Stack.Screen name="forum" />
+      <Stack.Screen name="sing" />
     </Stack>
   );
 }

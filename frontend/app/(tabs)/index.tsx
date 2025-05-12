@@ -1,12 +1,28 @@
+
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Modal, ImageBackground } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons'; // Import logout icon
 import styles from "./BalaqaiPage.styles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
 
+type RootStackParamList = {
+    index: undefined;
+    forum: undefined; 
+};
+
+type IndexScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
 const BalaqaiPage: React.FC = () => {
+    const navigation = useNavigation<IndexScreenNavigationProp>();
+
+    const handleForumNavigation = () => {
+        navigation.navigate('forum'); // Navigate to 'forum'
+    };
+
     const router = useRouter();
     const [modalVisible, setModalVisible] = useState(false);
     const [user, setUser] = useState<{ fullName: string; role: string } | null>(null);
@@ -28,7 +44,7 @@ const BalaqaiPage: React.FC = () => {
 
         checkUser();
     }, []);
-    
+
 
     const handleStart = () => {
         if (user) {
@@ -64,6 +80,9 @@ const BalaqaiPage: React.FC = () => {
             {/* Main Content */}
             <View style={styles.container}>
                 <Text style={styles.header}>BALAQAI</Text>
+                <TouchableOpacity style={styles.forumIconButton} onPress={handleForumNavigation}>
+                    <Ionicons name="chatbubble" size={30} color="#fff" />
+                </TouchableOpacity>
 
                 {/* Centered Greeting and Button */}
                 <View style={styles.centeredRow}>

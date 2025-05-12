@@ -16,6 +16,8 @@ import MemoryPage from './memory';
 import LettersPage from './letters';
 import LettersPracticePage from './letterspractice';
 import UserPage from './user';
+import ForumPage from './forum';
+import SingPage from './sing';
 
 
 
@@ -39,6 +41,8 @@ const App: React.FC = () => {
                 <Route path="/letters" element={<LettersPage />} />
                 <Route path="/letterspractice" element={<LettersPracticePage />} />
                 <Route path="/user" element={<UserPage />} />
+                <Route path="/forum" element={<ForumPage />} />
+                <Route path="/sing" element={<SingPage />} />
             </Routes>
         </Router>
     );
