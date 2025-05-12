@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Text, Dimensions, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import { useDailyTimer, BlockedMessage } from './timer'; // adjust path if needed
 
 const images = [
     require('@/assets/images/doll.png'),
@@ -34,11 +35,27 @@ type Card = {
 };
 
 const PairPage: React.FC = () => {
-    const navigation = useNavigation();
+    const router = useRouter();
+    const { isBlocked, beginTracking, endTracking } = useDailyTimer();
     const [cards, setCards] = useState<Card[]>(getShuffledCards());
     const [selected, setSelected] = useState<number[]>([]);
     const [matchedPairs, setMatchedPairs] = useState(0);
+    const [showContent, setShowContent] = useState(true);
 
+    // First useEffect - Timer tracking
+    useEffect(() => {
+        beginTracking();
+        return () => endTracking();
+    }, []);
+
+    // Check if blocked and update state
+    useEffect(() => {
+        if (isBlocked) {
+            setShowContent(false);
+        }
+    }, [isBlocked]);
+
+    // Second useEffect - Card matching logic
     useEffect(() => {
         if (selected.length === 2) {
             const [firstIndex, secondIndex] = selected;
@@ -96,50 +113,56 @@ const PairPage: React.FC = () => {
         (availableHeight - totalMarginsVertical) / numRows
     );
 
-    // Use FlatList to ensure correct grid structure
+    // Render based on state - no early returns
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
+        <>
+            {!showContent ? (
+                <BlockedMessage />
+            ) : (
+                <View style={styles.container}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                        <Ionicons name="arrow-back" size={24} color="black" />
+                    </TouchableOpacity>
 
-            <Text style={styles.title}>Суреттерді сәйкестендіріңіз</Text>
+                    <Text style={styles.title}>Суреттерді сәйкестендіріңіз</Text>
 
-            <FlatList
-                data={cards}
-                numColumns={numColumns}  // Ensures 6 columns
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item, index }) => (
-                    <TouchableOpacity
-                        style={[
-                            styles.card,
-                            {
-                                width: cardWidth,
-                                height: cardWidth,
-                                margin: cardMargin,
-                            },
-                        ]}
-                        onPress={() => handleCardPress(index)}
-                        disabled={item.revealed || item.matched}
-                    >
-                        {item.revealed || item.matched ? (
-                            <Image source={item.image} style={styles.image} />
-                        ) : (
-                            <View style={styles.cover} />
+                    <FlatList
+                        data={cards}
+                        numColumns={numColumns}  // Ensures 6 columns
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity
+                                style={[
+                                    styles.card,
+                                    {
+                                        width: cardWidth,
+                                        height: cardWidth,
+                                        margin: cardMargin,
+                                    },
+                                ]}
+                                onPress={() => handleCardPress(index)}
+                                disabled={item.revealed || item.matched}
+                            >
+                                {item.revealed || item.matched ? (
+                                    <Image source={item.image} style={styles.image} />
+                                ) : (
+                                    <View style={styles.cover} />
+                                )}
+                            </TouchableOpacity>
                         )}
-                    </TouchableOpacity>
-                )}
-            />
+                    />
 
-            {matchedPairs === 15 && (
-                <View style={styles.result}>
-                    <Text style={styles.resultText}>Барлық жұп табылды!</Text>
-                    <TouchableOpacity style={styles.restartButton} onPress={restartGame}>
-                        <Text style={styles.restartText}>Қайта бастау</Text>
-                    </TouchableOpacity>
+                    {matchedPairs === 15 && (
+                        <View style={styles.result}>
+                            <Text style={styles.resultText}>Барлық жұп табылды!</Text>
+                            <TouchableOpacity style={styles.restartButton} onPress={restartGame}>
+                                <Text style={styles.restartText}>Қайта бастау</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             )}
-        </View>
+        </>
     );
 };
 

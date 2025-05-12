@@ -14,6 +14,9 @@ export default function Layout() {
       <Stack.Screen name="admin" />
       <Stack.Screen name="diary" />
       <Stack.Screen name="next" />
+      <Stack.Screen name="user" />
+      <Stack.Screen name="letters" />
+      <Stack.Screen name="letterspractice" />
     </Stack>
   );
 }

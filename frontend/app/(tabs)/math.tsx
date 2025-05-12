@@ -6,6 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 
 type RootStackParamList = {
     math: undefined;
+    games:undefined;
 };
 
 type MathScreenNavigationProp = StackNavigationProp<RootStackParamList, 'math'>;

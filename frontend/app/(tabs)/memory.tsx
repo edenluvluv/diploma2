@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
+
+type RootStackParamList = {
+    memory: undefined;
+    games: undefined;
+};
+
+type MemoryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'memory'>;
 
 // Images for the memory game
 const images = [
@@ -11,6 +21,12 @@ const images = [
 ];
 
 const MemoryPage: React.FC = () => {
+    const navigation = useNavigation<MemoryScreenNavigationProp>();
+
+    const handleBack = () => {
+        navigation.navigate('games'); // Navigate back to the games page
+    };
+
     const [showImages, setShowImages] = useState(false);
     const [imageSequence, setImageSequence] = useState<any[]>([]); // The correct sequence of images
     const [userSequence, setUserSequence] = useState<any[]>([]); // User's input sequence
@@ -67,6 +83,9 @@ const MemoryPage: React.FC = () => {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                <Ionicons name="arrow-back" size={24} color="#555" />
+            </TouchableOpacity>
             <Text style={styles.title}>Memory Game</Text>
             <Text style={styles.round}>Round: {round}</Text>
 
@@ -109,6 +128,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#F5F5F5',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
     },
     title: {
         fontSize: 24,

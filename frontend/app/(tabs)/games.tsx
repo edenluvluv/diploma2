@@ -16,6 +16,7 @@ type RootStackParamList = {
     karaoke: undefined;
     memory: undefined;
     letters: undefined;
+    user: undefined;
 };
 
 type GamesScreenNavigationProp = StackNavigationProp<RootStackParamList, 'games'>;
@@ -31,38 +32,46 @@ const GamesPage: React.FC = () => {
         navigation.navigate('achievements');
     };
 
-    
+    const handleUserNavigation = () => {
+        navigation.navigate('user');
+    };
 
     const handlePairNavigation = () => {
         navigation.navigate('pair');
     };
+
     const handleMathNavigation = () => {
-        navigation.navigate('math'); 
+        navigation.navigate('math');
     };
 
     const handleMazeNavigation = () => {
         navigation.navigate('maze');
     };
+
     const handleDiaryNavigation = () => {
         navigation.navigate('diary');
     };
+
     const handleKaraokeNavigation = () => {
         navigation.navigate('karaoke');
     };
+
     const handleMemoryNavigation = () => {
         navigation.navigate('memory');
     };
+
     const handleLettersNavigation = () => {
         navigation.navigate('letters');
     };
 
-const handleNextNavigation = () => {
-        navigation.navigate('next'); 
+    const handleNextNavigation = () => {
+        navigation.navigate('next');
     };
+
     const games = [
         { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: handleDiaryNavigation },
         { id: 2, name: 'Ал тауып көр!', icon: '🕹️', onPress: handlePairNavigation },
-        { id: 3, name: 'Келесі не?', icon: '👾',  onPress: handleNextNavigation },
+        { id: 3, name: 'Келесі не?', icon: '👾', onPress: handleNextNavigation },
         { id: 4, name: 'лабиринт', icon: '🃏', onPress: handleMazeNavigation },
         { id: 5, name: 'Математика', icon: '🎲', onPress: handleMathNavigation },
         { id: 6, name: 'әріптер', icon: '🧩', onPress: handleLettersNavigation },
@@ -77,11 +86,15 @@ const handleNextNavigation = () => {
                 <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
 
-            {/* Achievements Button */}
-            <TouchableOpacity style={styles.achievementsButton} onPress={handleAchievements}>
-                <Ionicons name="trophy" size={24} color="#fff" />
-            </TouchableOpacity>
-
+            {/* Achievements + User Buttons */}
+            <View style={styles.topRightIcons}>
+                <TouchableOpacity onPress={handleAchievements} style={styles.iconButton}>
+                    <Ionicons name="trophy" size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleUserNavigation} style={styles.iconButton}>
+                    <Ionicons name="person-circle" size={24} color="#fff" />
+                </TouchableOpacity>
+            </View>
 
             <Text style={styles.title}>Oйнайык!</Text>
             <View style={styles.gamesContainer}>
@@ -89,7 +102,7 @@ const handleNextNavigation = () => {
                     <TouchableOpacity
                         key={game.id}
                         style={styles.gameCard}
-                        onPress={game.onPress} // Use the onPress handler for each game
+                        onPress={game.onPress}
                     >
                         <Text style={styles.gameIcon}>{game.icon}</Text>
                         <Text style={styles.gameName}>{game.name}</Text>
@@ -111,10 +124,14 @@ const styles = StyleSheet.create({
         top: 40,
         left: 20,
     },
-    achievementsButton: {
+    topRightIcons: {
         position: 'absolute',
         top: 40,
         right: 20,
+        flexDirection: 'row',
+    },
+    iconButton: {
+        marginLeft: 15,
     },
     title: {
         fontSize: 36,

@@ -11,7 +11,15 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
 
+type RootStackParamList = {
+    diary: undefined;
+    games: undefined;
+};
+type DiaryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'diary'>;
 type Note = {
     _id?: string;
     title: string;
@@ -19,6 +27,13 @@ type Note = {
 };
 
 const DiaryPage = () => {
+
+    const navigation = useNavigation<DiaryScreenNavigationProp>();
+
+    const handleBack = () => {
+        navigation.navigate('games'); // Navigate back to the games page
+    };
+
     const [notes, setNotes] = useState<Note[]>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -164,30 +179,32 @@ const DiaryPage = () => {
         }
     };
 
-    const renderGrid = () => {
+    const renderFeed = () => {
         return (
-            <ScrollView contentContainerStyle={styles.grid}>
+            <ScrollView contentContainerStyle={styles.feed}>
                 {isLoading ? (
                     <Text style={styles.loadingText}>Loading notes...</Text>
                 ) : notes.length > 0 ? (
                     notes.map((note) => (
                         <TouchableOpacity
                             key={note._id}
-                            style={styles.card}
+                            style={styles.postCard}
                             onPress={() => setSelectedNote(note)}
                         >
-                            <Text style={styles.cardTitle}>{note.title}</Text>
-                            <Text style={styles.cardContent}>
-                                {note.content.substring(0, 30)}
-                                {note.content.length > 30 && '...'}
+                            <Text style={styles.postTitle}>{note.title}</Text>
+                            <Text style={styles.postContent}>
+                                {note.content.length > 100
+                                    ? note.content.substring(0, 100) + '...'
+                                    : note.content}
                             </Text>
                         </TouchableOpacity>
                     ))
                 ) : (
                     <Text style={styles.emptyText}>No notes found. Create one!</Text>
                 )}
+
                 <TouchableOpacity
-                    style={[styles.card, styles.addCard]}
+                    style={styles.addPostButton}
                     onPress={() => {
                         setNewTitle('');
                         setNewContent('');
@@ -195,12 +212,12 @@ const DiaryPage = () => {
                         setSelectedNote({ title: '', content: '' });
                     }}
                 >
-                    <Text style={styles.cardTitle}>+ Add</Text>
+                    <Text style={styles.addPostText}>+ Create a new post</Text>
                 </TouchableOpacity>
             </ScrollView>
         );
     };
-
+    
     const renderNoteView = () => {
         if (!selectedNote) return null;
 
@@ -264,21 +281,33 @@ const DiaryPage = () => {
     }, [selectedNote]);
 
     return (
-        <View style={styles.container}>
-            {selectedNote ? renderNoteView() : renderGrid()}
+        <View style={{ flex: 1 }}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                <Ionicons name="arrow-back" size={28} color="#1E3A8A" />
+            </TouchableOpacity>
+            <View style={styles.container}>
+                {selectedNote ? renderNoteView() : renderFeed()}
+            </View>
         </View>
     );
 };
 
 const screenWidth = Dimensions.get('window').width;
-const cardSize = (screenWidth - 60) / 2;
+const cardSize = (screenWidth - 60) / 4; 
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#E0F2FE',
         padding: 15,
-    },
+        paddingTop: 80, // <-- add this
+    },    
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 10, // add this
+    },    
     grid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -287,38 +316,54 @@ const styles = StyleSheet.create({
     card: {
         width: cardSize,
         height: cardSize,
-        backgroundColor: '#f2f2f2',
-        padding: 15,
-        marginBottom: 15,
-        borderRadius: 10,
-    },
+        backgroundColor: '#FFFFFF',
+        padding: 10,
+        marginBottom: 10,
+        borderRadius: 14,
+        shadowColor: '#3B82F6',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 3,
+    },    
     addCard: {
-        backgroundColor: '#d9fdd3',
+        backgroundColor: '#DBEAFE',
         justifyContent: 'center',
         alignItems: 'center',
     },
     cardTitle: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginBottom: 5,
+        fontWeight: '700',
+        fontSize: 18,
+        color: '#1E3A8A',
+        marginBottom: 6,
     },
     cardContent: {
         fontSize: 14,
-        color: '#555',
+        color: '#475569',
     },
     messageView: {
         padding: 20,
+        backgroundColor: '#F0F9FF',
+        borderRadius: 12,
+        margin: 10,
+        shadowColor: '#3B82F6',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     inputLabel: {
-        fontWeight: 'bold',
-        marginBottom: 5,
+        fontWeight: '600',
+        marginBottom: 6,
         fontSize: 16,
+        color: '#1E3A8A',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#aaa',
-        borderRadius: 8,
-        padding: 12,
+        borderColor: '#BFDBFE',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 14,
         marginBottom: 20,
         fontSize: 16,
     },
@@ -329,42 +374,87 @@ const styles = StyleSheet.create({
     buttonRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        marginTop: 10,
     },
     button: {
-        backgroundColor: '#3b82f6',
-        padding: 15,
-        borderRadius: 8,
+        backgroundColor: '#3B82F6',
+        padding: 14,
+        borderRadius: 12,
         flex: 1,
         marginHorizontal: 5,
     },
     deleteButton: {
-        backgroundColor: '#ef4444',
+        backgroundColor: '#EF4444',
     },
     cancelButton: {
-        backgroundColor: '#9ca3af',
+        backgroundColor: '#6B7280',
     },
     disabledButton: {
-        opacity: 0.5,
+        opacity: 0.6,
     },
     buttonText: {
-        color: '#fff',
+        color: '#ffffff',
         textAlign: 'center',
-        fontWeight: 'bold',
+        fontWeight: '600',
         fontSize: 16,
     },
     loadingText: {
         textAlign: 'center',
         padding: 20,
-        color: '#555',
+        color: '#475569',
         fontSize: 16,
     },
     emptyText: {
         textAlign: 'center',
         padding: 20,
-        color: '#555',
+        color: '#475569',
         width: '100%',
         fontSize: 16,
     },
+    feed: {
+    paddingBottom: 20,
+},
+
+postCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+},
+
+postTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 6,
+},
+
+postContent: {
+    fontSize: 15,
+    color: '#334155',
+},
+
+addPostButton: {
+    backgroundColor: '#DBEAFE',
+    padding: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 30,
+},
+
+addPostText: {
+    color: '#1D4ED8',
+    fontSize: 16,
+    fontWeight: '600',
+},
+
 });
+
 
 export default DiaryPage;

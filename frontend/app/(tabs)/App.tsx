@@ -15,6 +15,7 @@ import KaraokePage from './karaoke';
 import MemoryPage from './memory';
 import LettersPage from './letters';
 import LettersPracticePage from './letterspractice';
+import UserPage from './user';
 
 
 
@@ -37,6 +38,7 @@ const App: React.FC = () => {
                 <Route path="/memory" element={<MemoryPage />} />
                 <Route path="/letters" element={<LettersPage />} />
                 <Route path="/letterspractice" element={<LettersPracticePage />} />
+                <Route path="/user" element={<UserPage />} />
             </Routes>
         </Router>
     );

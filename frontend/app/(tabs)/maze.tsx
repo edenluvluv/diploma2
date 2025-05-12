@@ -11,6 +11,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
+type RootStackParamList = {
+    maze: undefined;
+    games: undefined;
+};
+
 const numRows = 10;
 const numCols = 10;
 const OBSTACLE_COUNT = 20;

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
 
 // Define the interface for a Kazakh letter
 interface KazakhLetter {
@@ -57,6 +58,7 @@ const kazakhAlphabet: KazakhLetter[] = [
 type RootStackParamList = {
     letters: undefined;
     letterspractice: undefined;
+    games:undefined;
 };
 
 type LettersScreenNavigationProp = StackNavigationProp<RootStackParamList, 'letters'>;
@@ -66,9 +68,15 @@ const LettersPage: React.FC = () => {
     const handleLettersPracticeNavigation = () => {
         navigation.navigate('letterspractice');
     };
+    const handleBack = () => {
+        navigation.navigate('games'); 
+    };
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                <Ionicons name="arrow-back" size={24} color="#555" />
+            </TouchableOpacity>
             <Text style={styles.title}>Қазақ Әліпбиі</Text>
             <ScrollView contentContainerStyle={styles.alphabetContainer}>
                 {kazakhAlphabet.map((letter, index) => (
@@ -96,6 +104,11 @@ const styles = StyleSheet.create({
         paddingTop: 60,
         alignItems: 'center',
         paddingHorizontal: 10,
+    },
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
     },
     title: {
         fontSize: 28,
