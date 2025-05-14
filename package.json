@@ -23,12 +23,16 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "^4.10.0",
     "react-native-uuid": "^2.0.3"
   },
   "devDependencies": {
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.4",
     "@types/react-navigation": "^3.0.8"
   }
 }

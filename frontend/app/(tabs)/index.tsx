@@ -1,4 +1,5 @@
 
+
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Modal, ImageBackground } from "react-native";
@@ -11,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 type RootStackParamList = {
     index: undefined;
-    forum: undefined; 
+    forum: undefined;
 };
 
 type IndexScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
