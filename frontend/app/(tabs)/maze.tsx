@@ -3,24 +3,20 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Alert,
     StyleSheet,
     Dimensions,
-    ScrollView,
+    Image,
+    Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-
-type RootStackParamList = {
-    maze: undefined;
-    games: undefined;
-};
 
 const numRows = 10;
 const numCols = 10;
 const OBSTACLE_COUNT = 20;
 
 type Position = { row: number; col: number };
+type Direction = 'up' | 'down' | 'left' | 'right';
 
 const getRandomPosition = (): Position => ({
     row: Math.floor(Math.random() * numRows),
@@ -53,7 +49,10 @@ const MazePage: React.FC = () => {
 
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
-    const cellSize = Math.floor(Math.min(screenWidth, screenHeight - 300) / numCols) - 2;
+    const cellSize = Math.min(
+        Math.floor((screenWidth - 40) / numCols),
+        Math.floor((screenHeight - 300) / numRows)
+    );
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -66,8 +65,6 @@ const MazePage: React.FC = () => {
         return () => document.removeEventListener('keydown', handleKey);
     }, [player]);
 
-    type Direction = 'up' | 'down' | 'left' | 'right';
-
     const movePlayer = (dir: Direction) => {
         let { row, col } = player;
         if (dir === 'up') row = Math.max(0, row - 1);
@@ -79,10 +76,7 @@ const MazePage: React.FC = () => {
         if (!isBlocked) {
             const newPos = { row, col };
             setPlayer(newPos);
-
-            if (row === goal.row && col === goal.col) {
-                setGoalReached(true);
-            }
+            if (row === goal.row && col === goal.col) setGoalReached(true);
         }
     };
 
@@ -100,22 +94,22 @@ const MazePage: React.FC = () => {
         const isGoal = goal.row === row && goal.col === col;
         const isObstacle = obstacles.some(o => o.row === row && o.col === col);
 
-        let backgroundColor = '#fff';
-        if (isPlayer) backgroundColor = '#4CAF50';
-        else if (isGoal) backgroundColor = '#FFD700';
-        else if (isObstacle) backgroundColor = '#444';
+        let source = require('@/assets/images/grass.png');
+        if (isObstacle) {
+            source = require('@/assets/images/enemy.png');
+        } else if (isPlayer) {
+            source = require('@/assets/images/man.gif');
+        } else if (isGoal) {
+            source = require('@/assets/images/goal.png'); // optional goal image
+        }
 
         return (
             <View
                 key={`${row}-${col}`}
-                style={{
-                    width: cellSize,
-                    height: cellSize,
-                    backgroundColor,
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                }}
-            />
+                style={{ width: cellSize, height: cellSize, borderWidth: 1, borderColor: '#ccc' }}
+            >
+                <Image source={source} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            </View>
         );
     };
 
@@ -127,44 +121,44 @@ const MazePage: React.FC = () => {
 
             <Text style={styles.title}>Лабиринт</Text>
 
-            <View style={styles.gridAndControls}>
-                <ScrollView horizontal>
-                    <View>
-                        {Array.from({ length: numRows }).map((_, row) => (
-                            <View key={row} style={{ flexDirection: 'row' }}>
-                                {Array.from({ length: numCols }).map((_, col) => renderCell(row, col))}
-                            </View>
-                        ))}
+            <View style={{ marginTop: 10 }}>
+                {Array.from({ length: numRows }).map((_, row) => (
+                    <View key={row} style={{ flexDirection: 'row' }}>
+                        {Array.from({ length: numCols }).map((_, col) => renderCell(row, col))}
                     </View>
-                </ScrollView>
+                ))}
+            </View>
 
-                <View style={styles.arrowsContainer}>
-                    <TouchableOpacity onPress={() => movePlayer('up')} style={styles.arrowButton}>
-                        <Text style={styles.arrowText}>↑</Text>
+            <View style={styles.arrowsContainer}>
+                <TouchableOpacity onPress={() => movePlayer('up')} style={styles.arrowButton}>
+                    <Text style={styles.arrowText}>↑</Text>
+                </TouchableOpacity>
+                <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity onPress={() => movePlayer('left')} style={styles.arrowButton}>
+                        <Text style={styles.arrowText}>←</Text>
                     </TouchableOpacity>
-                    <View style={{ flexDirection: 'row' }}>
-                        <TouchableOpacity onPress={() => movePlayer('left')} style={styles.arrowButton}>
-                            <Text style={styles.arrowText}>←</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => movePlayer('down')} style={styles.arrowButton}>
-                            <Text style={styles.arrowText}>↓</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => movePlayer('right')} style={styles.arrowButton}>
-                            <Text style={styles.arrowText}>→</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity onPress={() => movePlayer('down')} style={styles.arrowButton}>
+                        <Text style={styles.arrowText}>↓</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => movePlayer('right')} style={styles.arrowButton}>
+                        <Text style={styles.arrowText}>→</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
 
-            {goalReached && (
-                <Text style={styles.successText}>🎉 Мақсатқа жеттіңіз!</Text>
-            )}
+            <Text style={styles.instructions}>Пернетақта немесе төмендегі батырмаларды пайдаланыңыз</Text>
 
-            <TouchableOpacity style={styles.restartButton} onPress={restartGame}>
-                <Text style={styles.restartText}>Қайта бастау</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.instructions}>Пернетақта немесе оң жақтағы батырмаларды пайдаланыңыз</Text>
+            {/* Success Modal */}
+            <Modal visible={goalReached} transparent animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.successText}>🎉 Құттықтаймыз! Мақсатқа жеттіңіз!</Text>
+                        <TouchableOpacity style={styles.restartButton} onPress={restartGame}>
+                            <Text style={styles.restartText}>Қайта бастау</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -173,14 +167,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#A3E7FC',
-        paddingTop: 50,
+        paddingTop: 40,
         alignItems: 'center',
-        paddingHorizontal: 10,
     },
     backButton: {
         position: 'absolute',
         top: 40,
         left: 20,
+        zIndex: 1,
     },
     title: {
         fontSize: 28,
@@ -188,15 +182,8 @@ const styles = StyleSheet.create({
         color: '#333',
         marginBottom: 10,
     },
-    gridAndControls: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        padding: 10,
-    },
     arrowsContainer: {
-        marginLeft: 10,
-        justifyContent: 'center',
+        marginTop: 20,
         alignItems: 'center',
     },
     arrowButton: {
@@ -226,12 +213,31 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontSize: 16,
         color: '#444',
+        textAlign: 'center',
+        paddingHorizontal: 20,
     },
     successText: {
         fontSize: 20,
         color: '#4CAF50',
-        marginTop: 20,
         fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: 30,
+        borderRadius: 12,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
 });
 

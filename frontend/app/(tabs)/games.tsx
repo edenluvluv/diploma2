@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     gameCard: {
-        width: '23%',
+        width: '48%',  // Adjusted for two columns
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 10,

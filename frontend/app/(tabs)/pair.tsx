@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, TouchableOpacity, StyleSheet, Text, Dimensions, FlatList } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    FlatList,
+    Image,
+    StyleSheet,
+    Dimensions
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useDailyTimer, BlockedMessage } from './timer'; // adjust path if needed
+import { useDailyTimer, BlockedMessage } from './timer';
 
 const images = [
     require('@/assets/images/doll.png'),
@@ -12,21 +20,6 @@ const images = [
     require('@/assets/images/lego.png'),
 ];
 
-const getShuffledCards = (): Card[] => {
-    const pairsNeeded = 15; // 15 pairs of images (30 cards in total)
-    const imagePool = [];
-
-    // Create 15 pairs (30 cards total)
-    for (let i = 0; i < pairsNeeded; i++) {
-        const img = images[i % images.length];
-        imagePool.push({ id: i * 2, image: img, matched: false, revealed: false });
-        imagePool.push({ id: i * 2 + 1, image: img, matched: false, revealed: false });
-    }
-
-    // Shuffle the cards
-    return imagePool.sort(() => Math.random() - 0.5);
-};
-
 type Card = {
     id: number;
     image: any;
@@ -34,42 +27,68 @@ type Card = {
     revealed: boolean;
 };
 
+const pairsPerLevel = [2, 8, 18]; // Level 1, 2, 3
+
+const generateShuffledCards = (pairCount: number): Card[] => {
+    const selectedImages = [];
+    for (let i = 0; i < pairCount; i++) {
+        const img = images[i % images.length];
+        selectedImages.push(img);
+    }
+
+    const cards: Card[] = [];
+    selectedImages.forEach((img, idx) => {
+        cards.push({ id: idx * 2, image: img, matched: false, revealed: false });
+        cards.push({ id: idx * 2 + 1, image: img, matched: false, revealed: false });
+    });
+
+    return cards.sort(() => Math.random() - 0.5);
+};
+
 const PairPage: React.FC = () => {
     const router = useRouter();
     const { isBlocked, beginTracking, endTracking } = useDailyTimer();
-    const [cards, setCards] = useState<Card[]>(getShuffledCards());
+    const [level, setLevel] = useState(0);
+    const [cards, setCards] = useState<Card[]>([]);
     const [selected, setSelected] = useState<number[]>([]);
     const [matchedPairs, setMatchedPairs] = useState(0);
+    const [key, setKey] = useState(Math.random().toString());
     const [showContent, setShowContent] = useState(true);
 
-    // First useEffect - Timer tracking
     useEffect(() => {
         beginTracking();
         return () => endTracking();
     }, []);
 
-    // Check if blocked and update state
     useEffect(() => {
         if (isBlocked) {
             setShowContent(false);
         }
     }, [isBlocked]);
 
-    // Second useEffect - Card matching logic
+    useEffect(() => {
+        const pairs = pairsPerLevel[level];
+        const newCards = generateShuffledCards(pairs);
+        setCards(newCards);
+        setSelected([]);
+        setMatchedPairs(0);
+        setKey(Math.random().toString()); // force FlatList remount
+    }, [level]);
+
     useEffect(() => {
         if (selected.length === 2) {
-            const [firstIndex, secondIndex] = selected;
-            if (cards[firstIndex].image === cards[secondIndex].image) {
+            const [first, second] = selected;
+            if (cards[first].image === cards[second].image) {
                 const newCards = [...cards];
-                newCards[firstIndex].matched = true;
-                newCards[secondIndex].matched = true;
+                newCards[first].matched = true;
+                newCards[second].matched = true;
                 setCards(newCards);
                 setMatchedPairs((prev) => prev + 1);
             } else {
                 setTimeout(() => {
                     const newCards = [...cards];
-                    newCards[firstIndex].revealed = false;
-                    newCards[secondIndex].revealed = false;
+                    newCards[first].revealed = false;
+                    newCards[second].revealed = false;
                     setCards(newCards);
                 }, 800);
             }
@@ -90,79 +109,62 @@ const PairPage: React.FC = () => {
         }
     };
 
-    const restartGame = () => {
-        setCards(getShuffledCards());
-        setSelected([]);
-        setMatchedPairs(0);
+    const nextLevel = () => {
+        if (level < pairsPerLevel.length - 1) {
+            setLevel((prev) => prev + 1);
+        }
     };
 
+    const numColumns = Math.ceil(Math.sqrt(cards.length));
     const screenWidth = Dimensions.get('window').width;
-    const screenHeight = Dimensions.get('window').height;
-    const availableHeight = screenHeight * 0.85;
-    const availableWidth = screenWidth * 0.95;
+    const cardMargin = 6;
+    const totalHorizontalMargin = cardMargin * (numColumns + 1);
+    const cardSize = (screenWidth * 0.9 - totalHorizontalMargin) / numColumns; // 5% left + 5% right = 90% usable width
 
-    const numColumns = 6;
-    const numRows = 5;
-    const cardMargin = 8;
+    return !showContent ? (
+        <BlockedMessage />
+    ) : (
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
 
-    const totalMarginsHorizontal = (numColumns + 1) * cardMargin;
-    const totalMarginsVertical = (numRows + 1) * cardMargin;
+            <Text style={styles.title}>Level {level + 1}</Text>
 
-    const cardWidth = Math.min(
-        (availableWidth - totalMarginsHorizontal) / numColumns,
-        (availableHeight - totalMarginsVertical) / numRows
-    );
-
-    // Render based on state - no early returns
-    return (
-        <>
-            {!showContent ? (
-                <BlockedMessage />
-            ) : (
-                <View style={styles.container}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={24} color="black" />
-                    </TouchableOpacity>
-
-                    <Text style={styles.title}>Суреттерді сәйкестендіріңіз</Text>
-
-                    <FlatList
-                        data={cards}
-                        numColumns={numColumns}  // Ensures 6 columns
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item, index }) => (
-                            <TouchableOpacity
-                                style={[
-                                    styles.card,
-                                    {
-                                        width: cardWidth,
-                                        height: cardWidth,
-                                        margin: cardMargin,
-                                    },
-                                ]}
-                                onPress={() => handleCardPress(index)}
-                                disabled={item.revealed || item.matched}
-                            >
-                                {item.revealed || item.matched ? (
-                                    <Image source={item.image} style={styles.image} />
-                                ) : (
-                                    <View style={styles.cover} />
-                                )}
-                            </TouchableOpacity>
+            <FlatList
+                key={key}
+                data={cards}
+                numColumns={numColumns}
+                keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={styles.grid}
+                renderItem={({ item, index }) => (
+                    <TouchableOpacity
+                        style={[styles.card, { width: cardSize, height: cardSize, margin: cardMargin }]}
+                        onPress={() => handleCardPress(index)}
+                        disabled={item.revealed || item.matched}
+                    >
+                        {item.revealed || item.matched ? (
+                            <Image source={item.image} style={styles.image} />
+                        ) : (
+                            <View style={styles.cover} />
                         )}
-                    />
+                    </TouchableOpacity>
+                )}
+            />
 
-                    {matchedPairs === 15 && (
-                        <View style={styles.result}>
-                            <Text style={styles.resultText}>Барлық жұп табылды!</Text>
-                            <TouchableOpacity style={styles.restartButton} onPress={restartGame}>
-                                <Text style={styles.restartText}>Қайта бастау</Text>
-                            </TouchableOpacity>
-                        </View>
+            {matchedPairs === pairsPerLevel[level] && (
+                <View style={styles.result}>
+                    <Text style={styles.resultText}>🎉 Барлық жұп табылды!</Text>
+                    {level < pairsPerLevel.length - 1 ? (
+                        <TouchableOpacity style={styles.button} onPress={nextLevel}>
+                            <Text style={styles.buttonText}>Келесі деңгей</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <Text style={styles.resultText}>Ойын аяқталды!</Text>
                     )}
                 </View>
             )}
-        </>
+        </View>
     );
 };
 
@@ -170,7 +172,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#A3E7FC',
-        paddingTop: 40,
+        paddingTop: 60,
+        paddingHorizontal: '5%', // 5% space from left and right edges
         alignItems: 'center',
     },
     backButton: {
@@ -179,42 +182,58 @@ const styles = StyleSheet.create({
         left: 20,
     },
     title: {
-        fontSize: 22,
-        marginBottom: 10,
+        fontSize: 24,
         fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    grid: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     card: {
+        backgroundColor: '#fff',
         borderRadius: 8,
         overflow: 'hidden',
-        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     image: {
-        width: '100%',
-        height: '100%',
+        width: '90%',
+        height: '90%',
         resizeMode: 'contain',
     },
     cover: {
         width: '100%',
         height: '100%',
-        backgroundColor: '#eee',
+        backgroundColor: '#17696F',
     },
     result: {
-        marginTop: 20,
         alignItems: 'center',
+        marginTop: 20,
     },
     resultText: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
+        marginBottom: 10,
     },
-    restartButton: {
-        backgroundColor: '#007AFF',
-        padding: 10,
-        marginTop: 10,
-        borderRadius: 8,
+    button: {
+        backgroundColor: '#17696F',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 12,
+        marginTop: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+        alignItems: 'center',
+        marginBottom:20,
     },
-    restartText: {
+    buttonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 17,
+        fontWeight: '600',
     },
 });
 
