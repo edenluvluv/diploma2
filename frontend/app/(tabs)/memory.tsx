@@ -3,9 +3,10 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Image,
     StyleSheet,
-    Dimensions
+    Image,
+    Dimensions,
+    ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -18,135 +19,128 @@ const images = [
     require('@/assets/images/lego.png'),
 ];
 
-const levels = [3, 4, 5];
+const sequenceCounts = [3, 4, 5];
 
-const shuffleArray = (arr: any[]) => {
-    return [...arr].sort(() => Math.random() - 0.5);
+const shuffle = (array: any[]) => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
 };
 
-const MemoryPage = () => {
+const MemoryGame = () => {
     const router = useRouter();
     const [level, setLevel] = useState(0);
     const [gameState, setGameState] = useState<'start' | 'show' | 'countdown' | 'play' | 'success' | 'fail'>('start');
     const [sequence, setSequence] = useState<any[]>([]);
     const [shuffled, setShuffled] = useState<any[]>([]);
-    const [userSequence, setUserSequence] = useState<any[]>([]);
+    const [selected, setSelected] = useState<any[]>([]);
     const [countdown, setCountdown] = useState(3);
 
     const screenWidth = Dimensions.get('window').width;
-    const cardSize = (screenWidth * 0.9 - 10 * (levels[level] - 1)) / levels[level];
+    const cardSize = screenWidth * 0.2;
 
-    const startLevel = () => {
-        const seq = images.slice(0, levels[level]);
-        setSequence(seq);
+    const startGame = () => {
+        const count = sequenceCounts[level];
+        const newSeq = shuffle(images).slice(0, count);
+        setSequence(newSeq);
         setGameState('show');
-        setUserSequence([]);
+        setSelected([]);
+
+        setTimeout(() => {
+            setGameState('countdown');
+            let counter = 3;
+            const interval = setInterval(() => {
+                setCountdown(counter);
+                counter--;
+                if (counter < 0) {
+                    clearInterval(interval);
+                    setShuffled(shuffle([...newSeq]));
+                    setGameState('play');
+                }
+            }, 1000);
+        }, 5000);
     };
 
-    useEffect(() => {
-        if (gameState === 'show') {
-            const timeout = setTimeout(() => {
-                setGameState('countdown');
-                setCountdown(3);
-            }, 5000);
-            return () => clearTimeout(timeout);
-        }
-    }, [gameState]);
-
-    useEffect(() => {
-        if (gameState === 'countdown') {
-            if (countdown > 0) {
-                const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
-                return () => clearTimeout(timer);
-            } else {
-                setShuffled(shuffleArray(sequence));
-                setGameState('play');
-            }
-        }
-    }, [gameState, countdown]);
-
     const handlePress = (img: any) => {
-        const newSeq = [...userSequence, img];
-        setUserSequence(newSeq);
+        if (gameState !== 'play') return;
+        const updated = [...selected, img];
+        setSelected(updated);
 
-        if (sequence[newSeq.length - 1] !== img) {
-            setGameState('fail');
-            return;
-        }
-
-        if (newSeq.length === sequence.length) {
-            setGameState('success');
+        if (updated.length === sequence.length) {
+            const correct = updated.every((item, idx) => item === sequence[idx]);
+            setGameState(correct ? 'success' : 'fail');
         }
     };
 
     const nextLevel = () => {
-        if (level < levels.length - 1) {
-            setLevel(l => l + 1);
+        if (level < 2) {
+            setLevel(level + 1);
             setGameState('start');
         }
     };
 
-    const renderImages = (imgs: any[], pressable = false) => (
-        <View style={styles.grid}>
-            {imgs.map((img, idx) => (
-                <TouchableOpacity
-                    key={idx}
-                    disabled={!pressable}
-                    onPress={() => pressable && handlePress(img)}
-                    style={[styles.card, { width: cardSize, height: cardSize }]}
-                >
-                    <Image source={img} style={styles.image} />
-                </TouchableOpacity>
-            ))}
-        </View>
-    );
+    const restart = () => {
+        setGameState('start');
+    };
 
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={24} color="black" />
+                <Ionicons name="arrow-back" size={24} color="#4A4A4A" />
             </TouchableOpacity>
 
-            <Text style={styles.title}>Level {level + 1}</Text>
+            <Text style={styles.title}>Memory Game - Level {level + 1}</Text>
 
             {gameState === 'start' && (
-                <TouchableOpacity style={styles.button} onPress={startLevel}>
-                    <Text style={styles.buttonText}>Бастау</Text>
+                <TouchableOpacity style={styles.button} onPress={startGame}>
+                    <Text style={styles.buttonText}>Start</Text>
                 </TouchableOpacity>
             )}
 
             {gameState === 'show' && (
-                <>
-                    <Text style={styles.subtitle}>Көңіл аударыңыз!</Text>
-                    {renderImages(sequence)}
-                </>
+                <ScrollView horizontal contentContainerStyle={styles.inlineGrid}>
+                    {sequence.map((img, i) => (
+                        <Image key={i} source={img} style={[styles.image, { width: cardSize, height: cardSize }]} />
+                    ))}
+                </ScrollView>
             )}
 
             {gameState === 'countdown' && (
-                <Text style={styles.countdown}>{countdown}</Text>
+                <Text style={styles.countdown}>Get ready: {countdown}</Text>
             )}
 
-            {gameState === 'play' && renderImages(shuffled, true)}
-
-            {gameState === 'fail' && (
-                <View style={styles.result}>
-                    <Text style={styles.resultText}>❌ Қате! Қайта көріңіз.</Text>
-                    <TouchableOpacity style={styles.button} onPress={() => setGameState('start')}>
-                        <Text style={styles.buttonText}>Қайта бастау</Text>
-                    </TouchableOpacity>
-                </View>
+            {gameState === 'play' && (
+                <ScrollView horizontal contentContainerStyle={styles.inlineGrid}>
+                    {shuffled.map((img, i) => (
+                        <TouchableOpacity key={i} onPress={() => handlePress(img)}>
+                            <Image source={img} style={[styles.image, { width: cardSize, height: cardSize }]} />
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             )}
 
             {gameState === 'success' && (
                 <View style={styles.result}>
-                    <Text style={styles.resultText}>🎉 Дұрыс тәртіп!</Text>
-                    {level < levels.length - 1 ? (
+                    <Text style={styles.resultText}>🎉 Congratulations!</Text>
+                    {level < 2 ? (
                         <TouchableOpacity style={styles.button} onPress={nextLevel}>
-                            <Text style={styles.buttonText}>Келесі деңгей</Text>
+                            <Text style={styles.buttonText}>Next Level</Text>
                         </TouchableOpacity>
                     ) : (
-                        <Text style={styles.resultText}>Ойын аяқталды!</Text>
+                        <Text style={styles.resultText}>Game Finished!</Text>
                     )}
+                </View>
+            )}
+
+            {gameState === 'fail' && (
+                <View style={styles.result}>
+                    <Text style={styles.resultText}>❌ Incorrect sequence!</Text>
+                    <TouchableOpacity style={styles.button} onPress={restart}>
+                        <Text style={styles.buttonText}>Restart</Text>
+                    </TouchableOpacity>
                 </View>
             )}
         </View>
@@ -156,10 +150,10 @@ const MemoryPage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#A3E7FC',
+        backgroundColor: '#F6F5F3',
         paddingTop: 60,
-        paddingHorizontal: '5%',
         alignItems: 'center',
+        paddingHorizontal: 16,
     },
     backButton: {
         position: 'absolute',
@@ -167,59 +161,42 @@ const styles = StyleSheet.create({
         left: 20,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 26,
+        fontWeight: '700',
         marginBottom: 20,
+        color: '#5C5470',
     },
-    subtitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 10,
-    },
-    countdown: {
-        fontSize: 48,
-        fontWeight: 'bold',
-        color: '#17696F',
-    },
-    grid: {
+    inlineGrid: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
         justifyContent: 'center',
-        gap: 10,
-        marginVertical: 20,
-    },
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    image: {
-        width: '90%',
-        height: '90%',
-        resizeMode: 'contain',
-    },
-    result: {
         alignItems: 'center',
         marginTop: 20,
     },
-    resultText: {
-        fontSize: 18,
+    image: {
+        margin: 10,
+        resizeMode: 'contain',
+        borderRadius: 12,
+        backgroundColor: '#EADFF5',
+        borderWidth: 2,
+        borderColor: '#D3CCE3',
+    },
+    countdown: {
+        fontSize: 30,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginTop: 40,
+        color: '#7D6E83',
     },
     button: {
-        backgroundColor: '#17696F',
+        backgroundColor: '#A0CED9',
         paddingVertical: 12,
         paddingHorizontal: 24,
-        borderRadius: 12,
-        marginTop: 12,
+        borderRadius: 16,
+        marginTop: 24,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.3,
+        shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 5,
+        elevation: 3,
         alignItems: 'center',
     },
     buttonText: {
@@ -227,6 +204,16 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '600',
     },
+    result: {
+        alignItems: 'center',
+        marginTop: 40,
+    },
+    resultText: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: '#6C5B7B',
+    },
 });
 
-export default MemoryPage;
+export default MemoryGame;

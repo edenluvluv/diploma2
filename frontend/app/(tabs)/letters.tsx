@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+    View,
+    Text,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    Dimensions,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 
-// Define the interface for a Kazakh letter
+const { width } = Dimensions.get('window');
+
 interface KazakhLetter {
     letter: string;
     latin: string;
     example: string;
 }
 
-// Use the interface to type the kazakhAlphabet array
 const kazakhAlphabet: KazakhLetter[] = [
     { letter: 'А', latin: 'A', example: 'Ана (Mother)' },
     { letter: 'Ә', latin: 'Á', example: 'Әке (Father)' },
@@ -58,41 +66,72 @@ const kazakhAlphabet: KazakhLetter[] = [
 type RootStackParamList = {
     letters: undefined;
     letterspractice: undefined;
-    games:undefined;
+    games: undefined;
 };
 
 type LettersScreenNavigationProp = StackNavigationProp<RootStackParamList, 'letters'>;
 
 const LettersPage: React.FC = () => {
     const navigation = useNavigation<LettersScreenNavigationProp>();
-    const handleLettersPracticeNavigation = () => {
-        navigation.navigate('letterspractice');
-    };
-    const handleBack = () => {
-        navigation.navigate('games'); 
-    };
+    const [learnMode, setLearnMode] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const nextLetter = () => setCurrentIndex((prev) => (prev + 1) % kazakhAlphabet.length);
+    const prevLetter = () =>
+        setCurrentIndex((prev) => (prev - 1 + kazakhAlphabet.length) % kazakhAlphabet.length);
+
+    const current = kazakhAlphabet[currentIndex];
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                <Ionicons name="arrow-back" size={24} color="#555" />
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('games')}>
+                <Ionicons name="arrow-back" size={26} color="#555" />
             </TouchableOpacity>
+
             <Text style={styles.title}>Қазақ Әліпбиі</Text>
-            <ScrollView contentContainerStyle={styles.alphabetContainer}>
-                {kazakhAlphabet.map((letter, index) => (
-                    <View key={index} style={styles.letterBox}>
-                        <Text style={styles.letter}>{letter.letter}</Text>
-                        <Text style={styles.latin}>{letter.latin}</Text>
-                        <Text style={styles.example}>{letter.example}</Text>
+
+            {!learnMode ? (
+                <ScrollView contentContainerStyle={styles.alphabetContainer}>
+                    {kazakhAlphabet.map((letter, index) => (
+                        <View key={index} style={styles.letterCard}>
+                            <Text style={styles.letter}>{letter.letter}</Text>
+                            <Text style={styles.latin}>{letter.latin}</Text>
+                            <Text style={styles.example}>{letter.example}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
+            ) : (
+                <View style={styles.learnContainer}>
+                    <Text style={styles.learnLetter}>{current.letter}</Text>
+                    <Text style={styles.learnLatin}>{current.latin}</Text>
+                    <Text style={styles.learnExample}>{current.example}</Text>
+                    <Image source={require('@/assets/images/a.png')} style={styles.learnImage} />
+                    <View style={styles.arrowContainer}>
+                        <TouchableOpacity onPress={prevLetter}>
+                            <Ionicons name="arrow-back-circle" size={50} color="#4C9EEB" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={nextLetter}>
+                            <Ionicons name="arrow-forward-circle" size={50} color="#4C9EEB" />
+                        </TouchableOpacity>
                     </View>
-                ))}
-            </ScrollView>
-            <TouchableOpacity
-                style={styles.practiceButton}
-                onPress={handleLettersPracticeNavigation} // Use the new navigation here
-            >
-                <Text style={styles.practiceButtonText}>Жаттығу</Text>
-            </TouchableOpacity>
+                </View>
+            )}
+
+            <View style={styles.buttonRow}>
+                <TouchableOpacity
+                    style={[styles.bottomButton, { backgroundColor: '#6A5ACD' }]}
+                    onPress={() => setLearnMode(!learnMode)}
+                >
+                    <Text style={styles.bottomButtonText}>{learnMode ? 'Көру' : 'Үйрену'}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.bottomButton, { backgroundColor: '#20B2AA' }]}
+                    onPress={() => navigation.navigate('letterspractice')}
+                >
+                    <Text style={styles.bottomButtonText}>Жаттығу</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -100,59 +139,110 @@ const LettersPage: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#EAF6FF',
+        backgroundColor: '#F7FAFC',
         paddingTop: 60,
-        alignItems: 'center',
         paddingHorizontal: 10,
     },
     backButton: {
         position: 'absolute',
         top: 40,
         left: 20,
+        zIndex: 1,
     },
     title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 20,
+        fontSize: 30,
+        fontWeight: '700',
+        marginBottom: 16,
+        textAlign: 'center',
         color: '#2A4D69',
     },
     alphabetContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
+        paddingBottom: 20,
     },
-    letterBox: {
-        backgroundColor: '#4FC3F7',
-        width: 120,
+    letterCard: {
+        backgroundColor: '#E0F7FA',
+        width: width / 3.2,
         height: 120,
-        margin: 8,
-        borderRadius: 10,
-        justifyContent: 'center',
+        margin: 6,
+        borderRadius: 16,
+        padding: 10,
         alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 2, height: 2 },
+        shadowRadius: 4,
     },
     letter: {
         fontSize: 28,
-        color: 'white',
-        fontWeight: 'bold',
+        fontWeight: '700',
+        color: '#007AFF',
     },
     latin: {
-        fontSize: 16,
-        color: 'white',
+        fontSize: 14,
+        color: '#555',
+        marginTop: 4,
     },
     example: {
-        fontSize: 14,
-        color: 'white',
+        fontSize: 12,
+        textAlign: 'center',
+        color: '#333',
+        marginTop: 4,
     },
-    practiceButton: {
+    learnContainer: {
+        alignItems: 'center',
         marginTop: 30,
-        backgroundColor: '#007AFF',
-        paddingVertical: 12,
-        paddingHorizontal: 24,
-        borderRadius: 10,
     },
-    practiceButtonText: {
-        color: 'white',
+    learnLetter: {
+        fontSize: 100,
+        fontWeight: 'bold',
+        color: '#6A5ACD',
+    },
+    learnLatin: {
+        fontSize: 28,
+        color: '#4C9EEB',
+        marginTop: -10,
+    },
+    learnExample: {
         fontSize: 18,
+        marginVertical: 12,
+        color: '#444',
+        textAlign: 'center',
+        paddingHorizontal: 12,
+    },
+    learnImage: {
+        width: 160,
+        height: 160,
+        marginVertical: 20,
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: '#ddd',
+    },
+    arrowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '60%',
+        marginTop: 16,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        marginTop: 20,
+        paddingBottom: 20,
+    },
+    bottomButton: {
+        paddingVertical: 14,
+        paddingHorizontal: 32,
+        borderRadius: 12,
+        elevation: 3,
+    },
+    bottomButtonText: {
+        color: 'white',
+        fontSize: 16,
         fontWeight: '600',
     },
 });
