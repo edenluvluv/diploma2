@@ -9,16 +9,23 @@ import {
     Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 
 interface Song {
     _id?: string;
     title: string;
     artist: string;
+    audio_url?: string;
+    lyrics?: string;
 }
 
+type RootStackParamList = {
+    karaoke: undefined;
+    sing: { song: Song };
+};
+
 const KaraokePage: React.FC = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const route = useRoute();
     const { role } = (route.params as { role?: string }) || { role: 'user' };
 
@@ -77,14 +84,17 @@ const KaraokePage: React.FC = () => {
     };
 
     const renderSong = ({ item }: { item: Song }) => (
-        <View style={styles.songItem}>
+        <TouchableOpacity
+            style={styles.songItem}
+            onPress={() => navigation.navigate('sing', { song: item })}
+        >
             <Text style={styles.songText}>{item.title} - {item.artist}</Text>
             {role === 'admin' && (
                 <TouchableOpacity onPress={() => deleteSong(item._id)}>
                     <Ionicons name="trash" size={20} color="#c00" />
                 </TouchableOpacity>
             )}
-        </View>
+        </TouchableOpacity>
     );
 
     return (
