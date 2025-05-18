@@ -1,201 +1,133 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { 
+  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert 
+} from 'react-native';
+
+// ✅ Обновлённый URL (убрали /forum)
+const API_URL = 'http://localhost:3000/api';
 
 type Comment = {
-    _id: string;
-    username: string;
-    text: string;
+  _id: string;
+  username: string;
+  text: string;
 };
 
 type Post = {
-    _id: string;
-    username: string;
-    content: string;
-    comments: Comment[];
+  _id: string;
+  username: string;
+  content: string;
+  comments: Comment[];
 };
 
-export default function Forum() {
-    const [posts, setPosts] = useState<Post[]>([]);
-    const [newPost, setNewPost] = useState('');
-    const [editingPostId, setEditingPostId] = useState<string | null>(null);
-    const [editPostContent, setEditPostContent] = useState('');
-    const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
-    const router = useRouter();
+export default function SimpleForum() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [newPost, setNewPost] = useState('');
+  const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
 
-    useEffect(() => {
-        fetchPosts();
-    }, []);
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-    const fetchPosts = async () => {
-        try {
-            const res = await fetch('https://your-api-url.com/api/posts');
-            const data = await res.json();
-            setPosts(data);
-        } catch (error) {
-            console.error('Fetch posts error:', error);
-        }
-    };
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch(`${API_URL}/posts`);
+      const data = await res.json();
+      setPosts(data);
+    } catch (err) {
+      Alert.alert('Ошибка', 'Не удалось загрузить посты');
+    }
+  };
 
-    const createPost = async () => {
-        if (!newPost) return;
-        try {
-            const res = await fetch('https://your-api-url.com/api/posts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: newPost, username: 'CurrentUser' }),
-            });
-            await res.json();
-            setNewPost('');
-            fetchPosts();
-        } catch (error) {
-            console.error('Create post error:', error);
-        }
-    };
+  const createPost = async () => {
+    if (!newPost.trim()) return;
+    try {
+      await fetch(`${API_URL}/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'Аноним', content: newPost }),
+      });
+      setNewPost('');
+      fetchPosts();
+    } catch (err) {
+      Alert.alert('Ошибка', 'Не удалось создать пост');
+    }
+  };
 
-    const deletePost = async (id: string) => {
-        try {
-            await fetch(`https://your-api-url.com/api/posts/${id}`, { method: 'DELETE' });
-            fetchPosts();
-        } catch (error) {
-            console.error('Delete post error:', error);
-        }
-    };
+  const addComment = async (postId: string) => {
+    const text = newComment[postId];
+    if (!text?.trim()) return;
+    try {
+      await fetch(`${API_URL}/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'Аноним', text }),
+      });
+      setNewComment((prev) => ({ ...prev, [postId]: '' }));
+      fetchPosts();
+    } catch (err) {
+      Alert.alert('Ошибка', 'Не удалось добавить комментарий');
+    }
+  };
 
-    const updatePost = async () => {
-        if (!editingPostId || !editPostContent) return;
-        try {
-            await fetch(`https://your-api-url.com/api/posts/${editingPostId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: editPostContent }),
-            });
-            setEditingPostId(null);
-            setEditPostContent('');
-            fetchPosts();
-        } catch (error) {
-            console.error('Update post error:', error);
-        }
-    };
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Форум родителей</Text>
 
-    const addComment = async (postId: string) => {
-        if (!newComment[postId]) return;
-        try {
-            await fetch(`https://your-api-url.com/api/posts/${postId}/comments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: newComment[postId], username: 'CurrentUser' }),
-            });
-            setNewComment((prev) => ({ ...prev, [postId]: '' }));
-            fetchPosts();
-        } catch (error) {
-            console.error('Add comment error:', error);
-        }
-    };
+      <TextInput
+        value={newPost}
+        onChangeText={setNewPost}
+        placeholder="Напишите сообщение..."
+        style={styles.input}
+        multiline
+      />
+      <TouchableOpacity onPress={createPost} style={styles.button}>
+        <Text style={styles.buttonText}>Отправить</Text>
+      </TouchableOpacity>
 
-    return (
-        <View style={{ flex: 1, padding: 16, backgroundColor: '#fff' }}>
-            <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 12 }}>
-                <Ionicons name="arrow-back" size={24} color="black" />
+      <ScrollView style={styles.scroll}>
+        {posts.map((post) => (
+          <View key={post._id} style={styles.post}>
+            <Text style={styles.postUser}>{post.username}</Text>
+            <Text style={styles.postText}>{post.content}</Text>
+
+            <Text style={styles.commentTitle}>Ответы:</Text>
+            {post.comments.map((cmt) => (
+              <View key={cmt._id} style={styles.comment}>
+                <Text style={styles.commentUser}>{cmt.username}</Text>
+                <Text>{cmt.text}</Text>
+              </View>
+            ))}
+
+            <TextInput
+              placeholder="Ответить..."
+              value={newComment[post._id] || ''}
+              onChangeText={(text) => setNewComment((prev) => ({ ...prev, [post._id]: text }))}
+              style={styles.commentInput}
+            />
+            <TouchableOpacity onPress={() => addComment(post._id)} style={styles.commentButton}>
+              <Text style={styles.commentButtonText}>Ответить</Text>
             </TouchableOpacity>
-
-            <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 12 }}>Forum</Text>
-
-            <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                <TextInput
-                    value={newPost}
-                    onChangeText={setNewPost}
-                    placeholder="Write a post..."
-                    style={{
-                        flex: 1,
-                        borderWidth: 1,
-                        borderColor: '#ccc',
-                        padding: 10,
-                        borderRadius: 8,
-                    }}
-                />
-                <TouchableOpacity onPress={createPost} style={{ marginLeft: 8, justifyContent: 'center' }}>
-                    <Ionicons name="send" size={24} color="#007AFF" />
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView>
-                {posts.map((post) => (
-                    <View
-                        key={post._id}
-                        style={{
-                            borderWidth: 1,
-                            borderColor: '#ddd',
-                            borderRadius: 12,
-                            padding: 12,
-                            marginBottom: 16,
-                            backgroundColor: '#f9f9f9',
-                        }}
-                    >
-                        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>{post.username}</Text>
-
-                        {editingPostId === post._id ? (
-                            <>
-                                <TextInput
-                                    value={editPostContent}
-                                    onChangeText={setEditPostContent}
-                                    style={{
-                                        borderWidth: 1,
-                                        borderColor: '#ccc',
-                                        borderRadius: 8,
-                                        padding: 8,
-                                        marginBottom: 8,
-                                    }}
-                                />
-                                <TouchableOpacity onPress={updatePost} style={{ marginBottom: 8 }}>
-                                    <Text style={{ color: '#007AFF' }}>Save</Text>
-                                </TouchableOpacity>
-                            </>
-                        ) : (
-                            <Text style={{ marginBottom: 8 }}>{post.content}</Text>
-                        )}
-
-                        <View style={{ flexDirection: 'row', marginBottom: 8 }}>
-                            <TouchableOpacity onPress={() => {
-                                setEditingPostId(post._id);
-                                setEditPostContent(post.content);
-                            }}>
-                                <Text style={{ color: '#007AFF', marginRight: 16 }}>Edit</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => deletePost(post._id)}>
-                                <Text style={{ color: 'red' }}>Delete</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>Comments</Text>
-                        {post.comments.map((comment) => (
-                            <View key={comment._id} style={{ paddingLeft: 12, marginBottom: 6 }}>
-                                <Text style={{ fontWeight: '600' }}>{comment.username}</Text>
-                                <Text>{comment.text}</Text>
-                            </View>
-                        ))}
-
-                        <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                            <TextInput
-                                value={newComment[post._id] || ''}
-                                onChangeText={(text) => setNewComment((prev) => ({ ...prev, [post._id]: text }))}
-                                placeholder="Add a comment..."
-                                style={{
-                                    flex: 1,
-                                    borderWidth: 1,
-                                    borderColor: '#ccc',
-                                    padding: 8,
-                                    borderRadius: 8,
-                                }}
-                            />
-                            <TouchableOpacity onPress={() => addComment(post._id)} style={{ marginLeft: 8, justifyContent: 'center' }}>
-                                <Ionicons name="chatbubble-ellipses" size={22} color="#007AFF" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
-            </ScrollView>
-        </View>
-    );
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 16, backgroundColor: '#F9FAFB' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 10, marginBottom: 10, backgroundColor: '#fff' },
+  button: { backgroundColor: '#4F46E5', padding: 12, borderRadius: 10, alignItems: 'center', marginBottom: 20 },
+  buttonText: { color: '#fff', fontWeight: 'bold' },
+  scroll: { flex: 1 },
+  post: { backgroundColor: '#fff', padding: 12, marginBottom: 16, borderRadius: 12, borderWidth: 1, borderColor: '#ddd' },
+  postUser: { fontWeight: 'bold', marginBottom: 4 },
+  postText: { marginBottom: 10 },
+  commentTitle: { fontWeight: '600', marginBottom: 4 },
+  comment: { paddingLeft: 10, marginBottom: 6 },
+  commentUser: { fontWeight: 'bold' },
+  commentInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 8, backgroundColor: '#F3F4F6' },
+  commentButton: { backgroundColor: '#4F46E5', padding: 8, borderRadius: 8, alignItems: 'center', marginTop: 8 },
+  commentButtonText: { color: '#fff' },
+});
