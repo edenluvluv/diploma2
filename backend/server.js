@@ -167,6 +167,74 @@ app.delete('/api/notes/:id', async (req, res) => {
     res.status(500).json({ message: 'Сервер қатесі' });
   }
 });
+const CommentSchema = new mongoose.Schema({
+  username: String,
+  text: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const PostSchema = new mongoose.Schema({
+  username: String,
+  content: String,
+  comments: [CommentSchema],
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Post = mongoose.model('Post', PostSchema);
+// Получить все посты
+app.get('/api/posts', async (req, res) => {
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: 'Ошибка при получении постов' });
+  }
+});
+
+// Создать новый пост
+app.post('/api/posts', async (req, res) => {
+  const { username, content } = req.body;
+
+  if (!content) return res.status(400).json({ message: 'Текст обязателен' });
+
+  try {
+    const newPost = new Post({ username, content });
+    await newPost.save();
+    res.status(201).json(newPost);
+  } catch (err) {
+    res.status(500).json({ message: 'Ошибка при создании поста' });
+  }
+});
+
+// Добавить комментарий к посту
+app.post('/api/posts/:postId/comments', async (req, res) => {
+  const { postId } = req.params;
+  const { username, text } = req.body;
+
+  if (!text) return res.status(400).json({ message: 'Комментарий обязателен' });
+
+  try {
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ message: 'Пост не найден' });
+
+    post.comments.push({ username, text });
+    await post.save();
+
+    res.status(201).json(post);
+  } catch (err) {
+    res.status(500).json({ message: 'Ошибка при добавлении комментария' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
 
 // Start server
 app.listen(PORT, () => {
