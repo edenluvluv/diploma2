@@ -92,11 +92,11 @@ const MemoryGame = () => {
                 <Ionicons name="arrow-back" size={24} color="#4A4A4A" />
             </TouchableOpacity>
 
-            <Text style={styles.title}>Memory Game - Level {level + 1}</Text>
+            <Text style={styles.title}>Жаттап ал - деңгей {level + 1}</Text>
 
             {gameState === 'start' && (
                 <TouchableOpacity style={styles.button} onPress={startGame}>
-                    <Text style={styles.buttonText}>Start</Text>
+                    <Text style={styles.buttonText}>Бастау</Text>
                 </TouchableOpacity>
             )}
 
@@ -109,7 +109,7 @@ const MemoryGame = () => {
             )}
 
             {gameState === 'countdown' && (
-                <Text style={styles.countdown}>Get ready: {countdown}</Text>
+                <Text style={styles.countdown}>Дайындал: {countdown}</Text>
             )}
 
             {gameState === 'play' && (
@@ -124,22 +124,22 @@ const MemoryGame = () => {
 
             {gameState === 'success' && (
                 <View style={styles.result}>
-                    <Text style={styles.resultText}>🎉 Congratulations!</Text>
+                    <Text style={styles.resultText}>Құттықтаймын!</Text>
                     {level < 2 ? (
                         <TouchableOpacity style={styles.button} onPress={nextLevel}>
-                            <Text style={styles.buttonText}>Next Level</Text>
+                            <Text style={styles.buttonText}>Келесі деңгей</Text>
                         </TouchableOpacity>
                     ) : (
-                        <Text style={styles.resultText}>Game Finished!</Text>
+                        <Text style={styles.resultText}>Ойын аяқталды!</Text>
                     )}
                 </View>
             )}
 
             {gameState === 'fail' && (
                 <View style={styles.result}>
-                    <Text style={styles.resultText}>❌ Incorrect sequence!</Text>
+                    <Text style={styles.resultText}>Дұрыс емес</Text>
                     <TouchableOpacity style={styles.button} onPress={restart}>
-                        <Text style={styles.buttonText}>Restart</Text>
+                        <Text style={styles.buttonText}>Қайтадан бастау</Text>
                     </TouchableOpacity>
                 </View>
             )}

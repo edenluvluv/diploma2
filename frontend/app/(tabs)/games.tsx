@@ -69,14 +69,14 @@ const GamesPage: React.FC = () => {
     };
 
     const games = [
-        { id: 1, name: 'жеке күнделік', icon: '🎮', onPress: handleDiaryNavigation },
+        { id: 1, name: 'Жеке күнделік', icon: '🎮', onPress: handleDiaryNavigation },
         { id: 2, name: 'Ал тауып көр!', icon: '🕹️', onPress: handlePairNavigation },
         { id: 3, name: 'Келесі не?', icon: '👾', onPress: handleNextNavigation },
-        { id: 4, name: 'лабиринт', icon: '🃏', onPress: handleMazeNavigation },
+        { id: 4, name: 'Лабиринт', icon: '🃏', onPress: handleMazeNavigation },
         { id: 5, name: 'Математика', icon: '🎲', onPress: handleMathNavigation },
-        { id: 6, name: 'әріптер', icon: '🧩', onPress: handleLettersNavigation },
-        { id: 7, name: 'karaoke', icon: '♟️', onPress: handleKaraokeNavigation },
-        { id: 8, name: 'memory', icon: '🎯', onPress: handleMemoryNavigation },
+        { id: 6, name: 'Әріптер', icon: '🧩', onPress: handleLettersNavigation },
+        { id: 7, name: 'Ән салайық!', icon: '♟️', onPress: handleKaraokeNavigation },
+        { id: 8, name: 'Жаттап ал!', icon: '🎯', onPress: handleMemoryNavigation },
     ];
 
     return (
@@ -96,7 +96,7 @@ const GamesPage: React.FC = () => {
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.title}>Oйнайык!</Text>
+            <Text style={styles.title}>Oйнайық!</Text>
             <View style={styles.gamesContainer}>
                 {games.map((game) => (
                     <TouchableOpacity
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     gameCard: {
-        width: '48%',  // Adjusted for two columns
+        width: '48%', 
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 10,
