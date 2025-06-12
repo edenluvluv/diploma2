@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, AppState } from 'react-native
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
-const MAX_TIME_MS = 1 * 60 * 1000;
+const MAX_TIME_MS = 10 * 60 * 1000;
 const STORAGE_KEY = 'dailyUsageTimer';
 
 export const useDailyTimer = () => {

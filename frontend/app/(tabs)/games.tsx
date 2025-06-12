@@ -41,6 +41,7 @@ const GamesPage: React.FC = () => {
         { id: 5, name: 'Математика', icon: '➕', nav: 'math' },
         { id: 6, name: 'Әріптер', icon: '🔤', nav: 'letters' },
         { id: 7, name: 'Жаттап ал!', icon: '🧩', nav: 'memory' },
+        { id: 8, name: 'Ән салайық!', icon: '🎤', nav: 'karaoke' },
     ];
 
     const handleNavigate = (screen: keyof RootStackParamList) => {
