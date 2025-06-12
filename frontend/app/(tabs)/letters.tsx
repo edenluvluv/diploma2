@@ -236,15 +236,19 @@ const LettersPage: React.FC = () => {
             style={styles.gradientContainer}
         >
             <ScrollView contentContainerStyle={styles.container}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.navigate('games')}
-                    activeOpacity={0.8}
-                >
-                    <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
+                <View style={styles.headerContainer}>
+                    <TouchableOpacity
+                        style={styles.backCircle}
+                        onPress={() => navigation.navigate('games')}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Қазақ Әліпби</Text>
+                </View>
+                <View style={{ height: 100 }} />
 
-                <Text style={styles.title}>Қазақ Әліпби</Text>
+
 
                 {!learnMode ? (
                     <View style={styles.alphabetContainer}>
@@ -376,31 +380,37 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         minHeight: '100%',
     },
-    backButton: {
-        alignSelf: 'flex-start',
-        backgroundColor: '#B8A9FF',
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+    headerContainer: {
+        position: 'absolute',
+        top: 40, // adjust for StatusBar if needed
+        left: 0,
+        right: 0,
+        height: 60,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
-        shadowColor: '#B8A9FF',
-        shadowOffset: {
-            width: 0,
-            height: 6,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 12,
-        elevation: 8,
+        paddingHorizontal: 16,
+        zIndex: 10,
     },
-    title: {
-        fontSize: 32,
+
+    backCircle: {
+        position: 'absolute',
+        left: 16,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#B8A9FF',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    headerTitle: {
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 24,
+        color: '#333',
         textAlign: 'center',
-        color: '#4A5568',
     },
+      
+    
     alphabetContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
