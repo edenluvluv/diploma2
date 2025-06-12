@@ -5,9 +5,22 @@ import RegisterPage from "./register"; // Ensure this file exists
 import LoginPage from "./login";
 import GamesPage from "./games"; // Ensure this file exists
 import AchievementsPage from "./achievements";
-import Karaoke_choosePage from "./karaoke_choose";
 import MathPage from './math';
 import AdminPage from './admin';
+import NextPage from "./next";
+import LabyrinthPage from './maze';
+import PairPage from './pair';
+import DiaryPage from './diary';
+import KaraokePage from './karaoke';
+import MemoryPage from './memory';
+import LettersPage from './letters';
+import LettersPracticePage from './letterspractice';
+import UserPage from './user';
+import ForumPage from './forum';
+import SingPage from './sing';
+import SongsPage from './songs';
+
+
 
 const App: React.FC = () => {
     return (
@@ -18,9 +31,20 @@ const App: React.FC = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/games" element={<GamesPage />} />
                 <Route path="/achievements" element={<AchievementsPage />} />
-                <Route path="/karaoke_choose" element={<Karaoke_choosePage />} />
                 <Route path="/math" element={<MathPage />} />
                 <Route path=".admin" element={<AdminPage />} />
+                <Route path="/next" element={<NextPage />} />
+                <Route path="/maze" element={<LabyrinthPage />} />
+                <Route path="/pair" element={<PairPage />} />
+                <Route path="/diary" element={<DiaryPage />} />
+                <Route path="/karaoke" element={<KaraokePage />} />
+                <Route path="/memory" element={<MemoryPage />} />
+                <Route path="/letters" element={<LettersPage />} />
+                <Route path="/letterspractice" element={<LettersPracticePage />} />
+                <Route path="/user" element={<UserPage />} />
+                <Route path="/forum" element={<ForumPage />} />
+                <Route path="/sing" element={<SingPage />} />
+                <Route path="/songs" element={<SongsPage />} />
             </Routes>
         </Router>
     );

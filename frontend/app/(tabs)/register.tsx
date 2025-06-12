@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 type RootStackParamList = {
     index: undefined;
     Register: undefined;
@@ -18,7 +25,7 @@ export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [secureText, setSecureText] = useState(true);
-    const [errorMessage, setErrorMessage] = useState(''); 
+    const [errorMessage, setErrorMessage] = useState('');
     const navigation = useNavigation<RegisterScreenNavigationProp>();
 
     const handleRegister = async () => {
@@ -26,21 +33,23 @@ export default function RegisterScreen() {
             setErrorMessage('Все поля должны быть заполнены');
             return;
         }
-    
+
         if (password.length < 8) {
             setErrorMessage('Пароль должен содержать минимум 8 символов');
             return;
         }
-    
+
         try {
-            const response = await api.post('/register', { fullName, phoneNumber, email, password });
-            console.log('Register response:', response.data);
+            const response = await api.post('/register', {
+                fullName,
+                phoneNumber,
+                email,
+                password,
+            });
 
             await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
-    
             setErrorMessage('');
-            navigation.navigate('index'); 
-    
+            navigation.navigate('index');
         } catch (error: any) {
             console.error('Ошибка при регистрации:', error);
             setErrorMessage(error.response?.data?.message || 'Ошибка сети');
@@ -61,57 +70,55 @@ export default function RegisterScreen() {
             <Text style={styles.subtitle}>TIPKEY</Text>
             <Text style={styles.description}>Ата-ана туралы ақпарат:</Text>
 
-            <View style={styles.row}>
-                <View style={styles.column}>
-                    <Text style={styles.label}>Аты-жөні</Text>
-                    <TextInput
-                        placeholder="Толық аты-жөніңізді енгізіңіз"
-                        placeholderTextColor="#999"
-                        style={styles.input}
-                        value={fullName}
-                        onChangeText={setFullName}
-                    />
-                </View>
-                <View style={styles.column}>
-                    <Text style={styles.label}>Телефон нөмірі</Text>
-                    <TextInput
-                        placeholder="+7 000 000 00 00"
-                        placeholderTextColor="#999"
-                        style={styles.input}
-                        value={phoneNumber}
-                        onChangeText={setPhoneNumber}
-                        keyboardType="phone-pad"
-                    />
-                </View>
+            <View style={styles.field}>
+                <Text style={styles.label}>Аты-жөні</Text>
+                <TextInput
+                    placeholder="Толық аты-жөніңізді енгізіңіз"
+                    placeholderTextColor="#999"
+                    style={styles.input}
+                    value={fullName}
+                    onChangeText={setFullName}
+                />
             </View>
 
-            <View style={styles.row}>
-                <View style={styles.column}>
-                    <Text style={styles.label}>Электрондық пошта</Text>
+            <View style={styles.field}>
+                <Text style={styles.label}>Телефон нөмірі</Text>
+                <TextInput
+                    placeholder="+7 000 000 00 00"
+                    placeholderTextColor="#999"
+                    style={styles.input}
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                    keyboardType="phone-pad"
+                />
+            </View>
+
+            <View style={styles.field}>
+                <Text style={styles.label}>Электрондық пошта</Text>
+                <TextInput
+                    placeholder="example@email.com"
+                    placeholderTextColor="#999"
+                    style={styles.input}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                />
+            </View>
+
+            <View style={styles.field}>
+                <Text style={styles.label}>Құпия сөз</Text>
+                <View style={styles.passwordContainer}>
                     <TextInput
-                        placeholder="example@email.com"
+                        placeholder="Кемінде 8 таңба, әріптер мен сандар"
                         placeholderTextColor="#999"
-                        style={styles.input}
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
+                        style={styles.passwordInput}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={secureText}
                     />
-                </View>
-                <View style={styles.column}>
-                    <Text style={styles.label}>Құпия сөз</Text>
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            placeholder="Кемінде 8 таңба, әріптер мен сандар"
-                            placeholderTextColor="#999"
-                            style={styles.passwordInput}
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={secureText}
-                        />
-                        <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                            <Ionicons name={secureText ? 'eye-off' : 'eye'} size={24} color="gray" />
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                        <Ionicons name={secureText ? 'eye-off' : 'eye'} size={24} color="gray" />
+                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -154,14 +161,9 @@ const styles = StyleSheet.create({
         color: '#777',
         marginBottom: 20,
     },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    field: {
         width: '100%',
         marginBottom: 15,
-    },
-    column: {
-        width: '48%',
     },
     label: {
         fontSize: 14,
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 10,
-        paddingHorizontal: 10,
+        paddingHorizontal: 14,
         backgroundColor: '#fff',
     },
     passwordContainer: {
@@ -192,10 +194,11 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 50,
     },
-    errorText: { // 🔴 Стиль ошибки
+    errorText: {
         color: 'red',
         fontSize: 14,
         marginBottom: 10,
+        textAlign: 'center',
     },
     button: {
         width: '100%',
