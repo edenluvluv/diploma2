@@ -13,7 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://192.168.1.69:3000/api';
 
 type Comment = {
   _id: string;

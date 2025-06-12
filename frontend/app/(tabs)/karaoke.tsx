@@ -15,7 +15,7 @@ export default function KaraokeScreen() {
     const router = useRouter();
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/songs')
+        fetch('http://192.168.1.69:3000/api/songs')
             .then((res) => res.json())
             .then(setSongs)
             .catch(console.error);

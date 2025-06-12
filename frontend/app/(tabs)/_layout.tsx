@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Stack, usePathname } from "expo-router";
 import { useDailyTimer, BlockedMessage } from "./timer"; // adjust path if needed
 
+
 export default function Layout() {
   const pathname = usePathname();
   const { isBlocked, beginTracking, endTracking } = useDailyTimer();

@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE!;
 
 type RootStackParamList = {
     songs: undefined;
@@ -41,7 +42,7 @@ const AdminPage: React.FC = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/users');
+            const response = await fetch('http://192.168.1.69:3000/api/users');
             const data = await response.json();
             setUsers(data);
         } catch (error) {
@@ -60,7 +61,7 @@ const AdminPage: React.FC = () => {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+                            const response = await fetch(`http://192.168.1.69:3000/api/users/${userId}`, {
                                 method: 'DELETE',
                             });
 
@@ -88,7 +89,7 @@ const AdminPage: React.FC = () => {
         if (!editingUser) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/api/users/${editingUser._id}`, {
+            const response = await fetch(`http://192.168.1.69:3000/api/users/${editingUser._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fullName: newFullName, role: newRole }),

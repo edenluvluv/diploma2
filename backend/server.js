@@ -295,5 +295,5 @@ app.delete('/api/songs/:id', async (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Сервер іске қосылды: http://localhost:${PORT}`);
+  console.log(`🚀 Сервер іске қосылды: http://192.168.1.69:${PORT}`);
 });

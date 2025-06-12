@@ -24,7 +24,7 @@ export default function SingScreen() {
             return;
         }
 
-        fetch(`http://localhost:3000/api/songs/${songID}`)
+        fetch(`http://192.168.1.69:3000/api/songs/${songID}`)
             .then((res) => res.json())
             .then(setSong)
             .catch(() => router.back());

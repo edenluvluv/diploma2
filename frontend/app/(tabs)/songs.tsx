@@ -34,7 +34,7 @@ const SongsPage = () => {
 
     const fetchSongs = async () => {
         try {
-            const res = await axios.get('http://localhost:3000/api/songs');
+            const res = await axios.get('http://192.168.1.69:3000/api/songs');
             setSongs(res.data);
         } catch (err) {
             console.error('Fetch songs error:', err);
@@ -68,9 +68,9 @@ const SongsPage = () => {
             };
 
             if (editId) {
-                await axios.put(`http://localhost:3000/api/songs/${editId}`, songData);
+                await axios.put(`http://192.168.1.69:3000/api/songs/${editId}`, songData);
             } else {
-                await axios.post('http://localhost:3000/api/songs', songData);
+                await axios.post('http://192.168.1.69:3000/api/songs', songData);
             }
 
             clearForm();
@@ -91,7 +91,7 @@ const SongsPage = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            await axios.delete(`http://localhost:3000/api/songs/${id}`);
+            await axios.delete(`http://192.168.1.69:3000/api/songs/${id}`);
             fetchSongs();
         } catch (err) {
             console.error('Delete song error:', err);
